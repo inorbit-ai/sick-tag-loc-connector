@@ -9,6 +9,9 @@ import json
 # Third-party
 import requests
 
+# The global endpoint name for streams
+STREAMS_ENDPOINT: str = "/streams"
+
 
 class RestClient:
     """RestClient
@@ -29,7 +32,7 @@ class RestClient:
             url (str): The URL to the API
             api_key (str): The API key for authentication
         """
-        self.url = url if url.endswith("/") else url + "/"
+        self.url = url
         self.headers = {"X-ApiKey": api_key, "Content-Type": "application/json"}
 
     def get(self, endpoint: str) -> dict:
