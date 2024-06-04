@@ -10,6 +10,7 @@ import logging
 from time import sleep
 
 from sick_tag_loc_connector.src.config.config_sick_tag_loc import load_and_validate
+from sick_tag_loc_connector.src.controller import SickTagLocMasterController
 
 
 # TODO(russell): abstract to higher level library
@@ -53,11 +54,23 @@ def main():
         logger.error(f"'{config_file}' configuration file does not exist")
         exit(1)
 
-        # Start master controller here
-        # Master controller should start all the needed connectors
-        # using the sic_tag_loc_config
-        # master_controller = MasterController(sic_tag_loc_config)
-        master_controller = None
+    # Start master controller here
+    # Master controller should start all the needed connectors
+    # using the sic_tag_loc_config
+    # master_controller = MasterController(sic_tag_loc_config)
+    # Example usage:
+    controller = SickTagLocMasterController()
+
+    # Create connectors
+    # NOTE(elvio.aruta98): here we need a "create all connectors" method
+    # leaving a draft here to catch the idea, but they shouldn't be created individually
+    # there should be some logic to create them all using the config
+    controller.create_connector(sic_tag_loc_config)
+    controller.create_connector(sic_tag_loc_config)
+    controller.create_connector(sic_tag_loc_config)
+
+    # Start all connectors
+    controller.start_all()
 
     try:
         while True:
@@ -65,7 +78,7 @@ def main():
             sleep(0)
     except KeyboardInterrupt:
         logger.info("...exiting")
-        master_controller.stop()
+        controller.stop_all()
 
 
 if __name__ == "__main__":

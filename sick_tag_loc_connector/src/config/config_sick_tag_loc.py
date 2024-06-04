@@ -41,18 +41,15 @@ class SickTagLocConfig(InorbitConnectorConfig):
     pass
 
 
-def load_and_validate(config_filename: str, robot_id: str) -> SickTagLocConfig:
+def load_and_validate(config_filename: str) -> SickTagLocConfig:
     """Loads and validates the configuration file.
 
     Raises an exception if the arguments or configuration are invalid.
 
     Args:
         config_filename (str): The YAML file to load the configuration from.
-        robot_id (str): The InOrbit robot ID for the Sick TAG
-
     Returns:
         SickTagLocConfig: The SICK Tag Loc configuration object with the loaded values.
-
     Raises:
         FileNotFoundError: If the configuration file does not exist.
         IndexError: If the configuration file does not contain the robot_id.
@@ -61,4 +58,6 @@ def load_and_validate(config_filename: str, robot_id: str) -> SickTagLocConfig:
     # NOTE(elvio.aruta98): this could change after some iterations
     # over this connector, don't take this like "the truth"
     # config = read_yaml(config_filename, robot_id)
+    # Since this is maybe loaded from the master controller, I don't think we want to use
+    # a robot id, probably a list of robotIds inside a configuration yaml
     return SickTagLocConfig()
