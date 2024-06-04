@@ -154,3 +154,6 @@ cython_debug/
 
 # Covers JetBrains IDEs
 .idea/**
+
+# Covers VSCode
+.vscode/
