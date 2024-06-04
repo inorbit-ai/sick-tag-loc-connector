@@ -62,6 +62,7 @@ class SickTagConnector(Connector):
         # also it could try to suscribe first to one, and if it fails after "x" retries it could try
         # with another protocol (websocket connection failed 10 times? -> suscribes to UDP)
         self._logger.info("subscribed to updates!")
+        # NOTE(elvio.aruta98): get url from config here
         ws_client = WebSocketClient(
             "wss://web-socket-url-from-sick-tag-loc"
         )  # Replace with your WebSocket URL
