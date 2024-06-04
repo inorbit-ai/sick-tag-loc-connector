@@ -20,7 +20,7 @@ from sick_tag_loc_connector.src.config import SickTagLocConfig
 from sick_tag_loc_apis.websocket import WebSocketClient
 
 
-class SickTagConnector(Connector):
+class SickTagLocConnector(Connector):
     """InOrbit Connector for a SICK Tag.
     this represents a tag inside the SICK Tag Loc system
 
@@ -41,7 +41,7 @@ class SickTagConnector(Connector):
 
     def connect(self) -> None:
         super()._connect()
-        self.subscribe_to_pose_updates()
+        self._subscribe_to_pose_updates()
 
     def disconnect(self) -> None:
         super()._disconnect()
@@ -56,7 +56,7 @@ class SickTagConnector(Connector):
     def execution_loop(self):
         super()._execution_loop()
 
-    def subscribe_to_pose_updates(self):
+    def _subscribe_to_pose_updates(self):
         # It should suscribe to UDP/WEBSOCKET in SICK Tag Loc
         # It could be taken from the config, depending on the use case (lower ms response from UDP)
         # also it could try to suscribe first to one, and if it fails after "x" retries it could try

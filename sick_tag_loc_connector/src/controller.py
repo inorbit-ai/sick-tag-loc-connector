@@ -1,4 +1,5 @@
-from sick_tag_loc_connector.src.connector import SickTagConnector
+from sick_tag_loc_connector.src.connector import SickTagLocConnector
+
 # NOTE(elvio.aruta98): This class needs some logic to read the config and be able to
 # create the needed connectors!
 # Also, it should interact with the rest API to get info from there (existent tags? tag last state?
@@ -9,7 +10,7 @@ class SickTagLocMasterController:
         self.connectors = []
 
     def create_connector(self, connector_config):
-        connector = SickTagConnector(connector_config)
+        connector = SickTagLocConnector(connector_config)
         self.connectors.append(connector)
         return connector
 
