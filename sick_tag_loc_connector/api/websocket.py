@@ -1,9 +1,17 @@
-# Example of a websocket client oriented to callback execution when messages are received
-# Not tested, left here for easy development in the future
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# License: MIT License
+# Copyright 2024 InOrbit, Inc.
 
-import websocket
+# TODO(elvio.aruta98): Example of a websocket client oriented to callback execution
+#                      when messages are received Not tested, left here for easy
+#                      development in the future
+
+# Standard
 import threading
-import json
+
+# Third-party
+import websocket
 
 
 class WebSocketClient:
@@ -31,7 +39,10 @@ class WebSocketClient:
     def connect(self, callback):
         self.callback = callback
         self.ws = websocket.WebSocketApp(
-            self.url, on_message=self.on_message, on_error=self.on_error, on_close=self.on_close
+            self.url,
+            on_message=self.on_message,
+            on_error=self.on_error,
+            on_close=self.on_close,
         )
         self.ws.on_open = self.on_open
         self.running = True
