@@ -41,7 +41,7 @@ class SickTagConnector(Connector):
 
     def connect(self) -> None:
         super()._connect()
-        self.subscribe_to_websocket()
+        self.subscribe_to_pose_updates()
 
     def disconnect(self) -> None:
         super()._disconnect()
@@ -56,7 +56,7 @@ class SickTagConnector(Connector):
     def execution_loop(self):
         super()._execution_loop()
 
-    def subscribe_to_websocket(self):
+    def subscribe_to_pose_updates(self):
         # It should suscribe to UDP/WEBSOCKET in SICK Tag Loc
         # It could be taken from the config, depending on the use case (lower ms response from UDP)
         # also it could try to suscribe first to one, and if it fails after "x" retries it could try
