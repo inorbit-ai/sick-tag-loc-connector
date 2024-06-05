@@ -15,18 +15,16 @@ from sick_tag_loc_connector.api.websocket import WebSocketClient
 
 class SickTagLocConnector(Connector):
     """InOrbit Connector for a SICK Tag.
-    this represents a tag inside the SICK Tag Loc system
-
-    TODO(elvio.aruta): Add a better description
+    TODO(elvio.aruta98): Add a better description
+                         this represent a tag inside the SICK Tag Loc system
     """
 
     def __init__(self, robot_id: str, config: SickTagLocConfig) -> None:
         """Initialize a new SICK Tag connector
-        TODO(elvio.aruta): this represent a tag inside the SICK Tag Loc system
 
         Args:
-            robot_id (str): The ID used in InOrbit of the Tag from the SICK Tag Loc system.
-            config (SickTagLocConfig): The configuration for the connector.
+            tag_id (str): Tag ID from the SICK system for use in InOrbit
+            config (SickTagLocConfig): The configuration for the connector
         """
 
         self.config = config
