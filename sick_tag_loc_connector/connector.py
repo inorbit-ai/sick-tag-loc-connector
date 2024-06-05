@@ -16,7 +16,7 @@ from sick_tag_loc_connector.api.websocket import WebSocketClient
 class SickTagLocConnector(Connector):
     """InOrbit Connector for a SICK Tag.
     TODO(elvio.aruta98): Add a better description
-                         this represent a tag inside the SICK Tag Loc system
+                         this represents a tag inside the SICK Tag Loc system
     """
 
     def __init__(self, robot_id: str, config: SickTagLocConfig) -> None:
