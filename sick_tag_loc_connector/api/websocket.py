@@ -3,62 +3,84 @@
 # License: MIT License
 # Copyright 2024 InOrbit, Inc.
 
-# TODO(elvio.aruta98): Example of a websocket client oriented to callback execution
-#                      when messages are received Not tested, left here for easy
-#                      development in the future
-
 # Standard
 import threading
+import logging
 
-# Third-party
+# Third Party
 import websocket
 
-
 class WebSocketClient:
+    """WebSocketClient
 
+    A helper class that handles connections to a WebSocket server, listens for messages,
+    and executes a callback function upon receiving messages
+    """
     def __init__(self, url):
+        """WebSocketClient Constructor
+
+        Initializes the WebSocketClient.
+
+        Args:
+            url: The WebSocket server URL to connect to.
+        """
+        self.logger = logging.getLogger(name=self.__class__.__name__)
         self.url = url
         self.ws = None
-        self.callback = None
-        self.running = False
+        self.thread = None
 
-    def on_message(self, ws, message):
-        if self.callback:
-            self.callback(message)
+    def on_error(self, error) -> None:
+        """
+        Callback function to handle errors.
 
-    def on_error(self, ws, error):
-        print(f"Error: {error}")
+        Args:
+            error: The error message.
+        """
+        self.logger.error(f"error: {error}")
 
-    def on_close(self, ws, close_status_code, close_msg):
-        print(f"Closed: {close_status_code} - {close_msg}")
-        self.running = False
+    def on_close(self) -> None:
+        """
+        Callback function to handle the closing of the WebSocket connection.
+        """
+        self.logger.info(f"Connection closed for {self.url}")
 
-    def on_open(self, ws):
-        print("Connection opened")
+    def on_open(self) -> None:
+        """
+        Callback function to handle the opening of the WebSocket connection.
+        """
+        self.logger.info(f"Connection opened for {self.url}")
 
-    def connect(self, callback):
-        self.callback = callback
+    def send(self, data) -> None:
+        """
+        Send a message through the WebSocket connection.
+
+        Args:
+            data: The data to send.
+        """
+        if self.ws:
+            self.ws.send(data)
+
+    def connect(self, on_message_callback) -> None:
+        """
+        Establish the WebSocket connection and start listening for messages.
+
+        Args:
+        on_message_callback: The callback function to handle incoming messages.
+        """
         self.ws = websocket.WebSocketApp(
             self.url,
-            on_message=self.on_message,
-            on_error=self.on_error,
-            on_close=self.on_close,
+            on_message=lambda ws, msg: on_message_callback(msg),
+            on_error=lambda ws, err: self.on_error(err),
+            on_close=lambda ws: self.on_close(),
+            on_open=lambda ws: self.on_open(),
         )
-        self.ws.on_open = self.on_open
-        self.running = True
-
-        # Run the WebSocket in a separate thread to avoid blocking
         self.thread = threading.Thread(target=self.ws.run_forever)
         self.thread.start()
 
-    def send(self, message):
-        if self.ws and self.ws.sock and self.ws.sock.connected:
-            self.ws.send(message)
-        else:
-            print("WebSocket is not connected.")
-
-    def close(self):
-        self.running = False
+    def close(self) -> None:
+        """
+        Close the WebSocket connection and stop the listening thread.
+        """
         if self.ws:
             self.ws.close()
         if self.thread:
