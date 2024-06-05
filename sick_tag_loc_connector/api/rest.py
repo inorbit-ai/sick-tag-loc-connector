@@ -5,12 +5,29 @@
 
 # Standard
 import json
+from enum import Enum
 
 # Third-party
 import requests
 
 # The global endpoint name for streams
 STREAMS_ENDPOINT: str = "/streams"
+
+
+class FeedTypes(Enum):
+    """Enum representing different types of feeds.
+
+    These are all the currently supported feeds in the SICK Tag-LOC system.
+
+    Attributes:
+        ANCHOR (str): The feed type for anchor feeds.
+        TAG (str): The feed type for tag feeds.
+        BUILDING (str): The feed type for building feeds.
+    """
+
+    ANCHOR = "anchor"
+    TAG = "tag"
+    BUILDING = "building"
 
 
 class RestClient:
