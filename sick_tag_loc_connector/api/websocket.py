@@ -16,16 +16,18 @@ class WebSocketClient:
     A helper class that handles connections to a WebSocket server, listens for messages,
     and executes a callback function upon receiving messages
     """
-    def __init__(self, url):
+    def __init__(self, url, on_message_callback):
         """WebSocketClient Constructor
 
         Initializes the WebSocketClient.
 
         Args:
             url: The WebSocket server URL to connect to.
+            on_message_callback: Callback function to execute when a message is received
         """
         self.logger = logging.getLogger(name=self.__class__.__name__)
         self.url = url
+        self.on_message_callback = on_message_callback
         self.ws = None
         self.thread = None
 
@@ -50,6 +52,12 @@ class WebSocketClient:
         """
         self.logger.info(f"Connection opened for {self.url}")
 
+    def on_message(self, msg) -> None:
+        if self.on_message_callback:
+            self.on_message_callback(msg)
+        else:
+            self.logger.warning(f"warning: on message callback function not configured")
+
     def send(self, data) -> None:
         """
         Send a message through the WebSocket connection.
@@ -60,7 +68,7 @@ class WebSocketClient:
         if self.ws:
             self.ws.send(data)
 
-    def connect(self, on_message_callback) -> None:
+    def connect(self) -> None:
         """
         Establish the WebSocket connection and start listening for messages.
 
@@ -69,7 +77,7 @@ class WebSocketClient:
         """
         self.ws = websocket.WebSocketApp(
             self.url,
-            on_message=lambda ws, msg: on_message_callback(msg),
+            on_message=lambda ws, msg: self.on_message(msg),
             on_error=lambda ws, err: self.on_error(err),
             on_close=lambda ws: self.on_close(),
             on_open=lambda ws: self.on_open(),

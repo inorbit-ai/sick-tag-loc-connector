@@ -52,8 +52,10 @@ class SickTagLocConnector(Connector):
         # NOTE(elvio.aruta): self.config.ws_api_url is not defined
         # It should be defined inside SickTagLocConfig
         # Creates a new WebSocketClient
-        self.poses_ws_client = WebSocketClient(self.config.ws_api_url)
-        self.poses_ws_client.connect(self._publish_poses_on_inorbit)
+        self.poses_ws_client = WebSocketClient(
+            self.config.ws_api_url, self._publish_poses_on_inorbit
+        )
+        self.poses_ws_client.connect()
         self.poses_ws_client.send(self._build_pose_subscription_messsage())
 
     def _get_feed_id(self) -> str:
