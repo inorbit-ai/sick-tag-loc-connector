@@ -6,8 +6,9 @@
 # Standard
 import threading
 import logging
+from typing import Callable, Union
 
-# Third Party
+# Third-party
 import websocket
 
 class WebSocketClient:
@@ -16,14 +17,14 @@ class WebSocketClient:
     A helper class that handles connections to a WebSocket server, listens for messages,
     and executes a callback function upon receiving messages
     """
-    def __init__(self, url, on_message_callback):
+    def __init__(self, url: str, on_message_callback: Callable):
         """WebSocketClient Constructor
 
         Initializes the WebSocketClient.
 
         Args:
-            url: The WebSocket server URL to connect to.
-            on_message_callback: Callback function to execute when a message is received
+            url (str): The WebSocket server URL to connect to.
+            on_message_callback (Callable): Callback function to execute when a message is received
         """
         self.logger = logging.getLogger(name=self.__class__.__name__)
         self.url = url
@@ -31,12 +32,12 @@ class WebSocketClient:
         self.ws = None
         self.thread = None
 
-    def on_error(self, error) -> None:
+    def on_error(self, error: str) -> None:
         """
-        Callback function to handle errors.
+        Callback function to handle errors, by default this will simply log the error message.
 
         Args:
-            error: The error message.
+            error (str): The error message.
         """
         self.logger.error(f"error: {error}")
 
@@ -52,28 +53,33 @@ class WebSocketClient:
         """
         self.logger.info(f"Connection opened for {self.url}")
 
-    def on_message(self, msg) -> None:
+    def on_message(self, msg: str) -> None:
+        """
+        Callback function to handle the messages from the WebSocket connection.
+
+        Args:
+            msg (str): Message received from the web socket connection.
+        """
         if self.on_message_callback:
             self.on_message_callback(msg)
         else:
-            self.logger.warning(f"warning: on message callback function not configured")
+            self.logger.warning("on_message_callback function not configured")
 
-    def send(self, data) -> None:
+    def send(self, data: Union[bytes, str]) -> None:
         """
         Send a message through the WebSocket connection.
 
         Args:
-            data: The data to send.
+            data (bytes | str): The data to send.
         """
         if self.ws:
             self.ws.send(data)
+        else:
+            self.logger.warning("WebSocketApp not initialized, data will not be sent.")
 
     def connect(self) -> None:
         """
         Establish the WebSocket connection and start listening for messages.
-
-        Args:
-        on_message_callback: The callback function to handle incoming messages.
         """
         self.ws = websocket.WebSocketApp(
             self.url,

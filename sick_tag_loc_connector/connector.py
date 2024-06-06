@@ -6,7 +6,7 @@
 # Standard
 import json
 
-# InOrbit
+# Third-party
 from inorbit_connector.connector import Connector
 
 from sick_tag_loc_connector.models import SickTagLocConfig
@@ -68,6 +68,8 @@ class SickTagLocConnector(Connector):
         # config is still not defined
         ws_api_key = self.config.ws_api_key
         feed_id = self._get_feed_id()
+        # TODO(elvio.aruta): Move this conversion elsewhere, maybe a subclass of WebSocketClient
+        # -> (TagStreamWebSocketClient)
         message = f'{{"headers":{{"X-ApiKey":"{ws_api_key}"}}, "method":"subscribe", "resource":"/feeds/{feed_id}"}}'
         return message
 
