@@ -4,7 +4,7 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any
+from typing import Type, TypeVar, Set, Any, List
 
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
@@ -117,6 +117,23 @@ class Feed:
         """
         data = rest_client.get(f"/{ENDPOINT}/{feed_id}")
         return cls(rest_client, **data)
+
+    @classmethod
+    def get_all(cls: Type[T], rest_client: RestClient) -> List[T]:
+        """Get all the feeds from the system.
+
+        This class method will attempt to load all the feeds from the SICK
+        Tag-LOC system via the REST API.
+
+        Args:
+            rest_client (RestClient): The client to communicate with the REST API
+
+        Returns:
+            A list with instances of the Feed class, representing the retrieved feeds.
+        """
+        data = rest_client.get(f"/{ENDPOINT}")
+        feed_list = [cls(rest_client, **feed) for feed in data["results"]]
+        return feed_list
 
     @classmethod
     def create(cls: Type[T], rest_client: RestClient, data: dict) -> T:
