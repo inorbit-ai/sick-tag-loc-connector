@@ -53,23 +53,8 @@ def main():
         logger.error(f"'{config_file}' configuration file does not exist")
         exit(1)
 
-    # Start master controller here
-    # Master controller should start all the needed connectors
-    # using the sic_tag_loc_config
-    # master_controller = MasterController(sic_tag_loc_config)
-    # Example usage:
-    controller = SickTagLocMasterController()
-
-    # Create connectors
-    # TODO(elvio.aruta98): here we need a "create all connectors" method
-    # leaving a draft here to catch the idea, but they shouldn't be created individually
-    # there should be some logic to create them all using the config
-    controller.create_connector(sic_tag_loc_config)
-    controller.create_connector(sic_tag_loc_config)
-    controller.create_connector(sic_tag_loc_config)
-
-    # Start all connectors
-    controller.start_all()
+    controller = SickTagLocMasterController(sic_tag_loc_config)
+    controller.start_controller()
 
     try:
         while True:
@@ -77,7 +62,7 @@ def main():
             sleep(0)
     except KeyboardInterrupt:
         logger.info("...exiting")
-        controller.stop_all()
+        controller.stop_controller()
 
 
 if __name__ == "__main__":

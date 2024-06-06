@@ -11,6 +11,7 @@ from inorbit_connector.connector import Connector
 
 from sick_tag_loc_connector.models import SickTagLocConfig
 from sick_tag_loc_connector.api.websocket import WebSocketClient
+from sick_tag_loc_connector.api.tag import Tag
 
 
 class SickTagLocConnector(Connector):
@@ -19,16 +20,14 @@ class SickTagLocConnector(Connector):
                          this represents a tag inside the SICK Tag Loc system
     """
 
-    def __init__(self, robot_id: str, config: SickTagLocConfig) -> None:
+    def __init__(self, tag: Tag, config: SickTagLocConfig) -> None:
         """Initialize a new SICK Tag connector
-
         Args:
-            tag_id (str): Tag ID from the SICK system for use in InOrbit
-            config (SickTagLocConfig): The configuration for the connector
-        """
 
+        """
         self.config = config
-        super().__init__(robot_id, self.config)
+        self.tag = tag
+        super().__init__(self.assign_inorbit_id(self.tag._id), self.config)
         self.poses_ws_client = None
 
     def connect(self) -> None:
@@ -53,7 +52,7 @@ class SickTagLocConnector(Connector):
         # It should be defined inside SickTagLocConfig
         # Creates a new WebSocketClient
         self.poses_ws_client = WebSocketClient(
-            self.config.ws_api_url, self._publish_poses_on_inorbit
+            self.config.connector_config.sick, self._publish_poses_on_inorbit
         )
         self.poses_ws_client.connect()
         self.poses_ws_client.send(self._build_pose_subscription_messsage())
@@ -96,3 +95,8 @@ class SickTagLocConnector(Connector):
         # Add Edge SDK publish_pose() method from RobotSession
         # self.inorbit_sess.publish_pose(**pose)
         pass
+
+    def assign_inorbit_id(self, tag_id: str) -> str:
+        # NOTE(elvio.aruta): this is wrong and 100% must be changed
+        # this does not ensure uniqueness in the database.
+        return f"rtls-sick-{tag_id}"
