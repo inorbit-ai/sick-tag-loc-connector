@@ -120,7 +120,7 @@ class Tag(Feed):
             An instance of the Tag class, representing the retrieved tag
         """
         data = rest_client.get(f"/{ENDPOINT}")
-        tag_list = [cls(rest_client, **feed) for feed in data["results"]]
+        tag_list = [cls(rest_client, **tag) for tag in data["results"]]
         return tag_list
 
     @classmethod
