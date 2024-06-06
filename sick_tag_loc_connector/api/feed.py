@@ -31,12 +31,12 @@ class Feed:
                         Public feed can be looked up by any X-ApiKey
         description (str | None): User defined description
         feed (str | None): This parameter can be set to any value
-        feed_type (str | None): Type of feed (tag, anchor, or building)
         tags (Set[str]): Feeds can be filtered by the value of this meta-tag
         version (str | None): Can be set to any value
         website (str | None): Can be set to any value
 
-        feed_id (str | None): Auto generated unique ID which identifies feeds
+        _id (str | None): Auto generated unique ID which identifies feeds
+        _type (str | None): Type of feed (tag, anchor, or building)
         updated (str | None): Auto set to the time when the feed was last updated
         created (str | None): Auto set to the time when the feed was created
         creator (str | None): Auto set to the user whose X-ApiKey was used for creation
@@ -51,7 +51,6 @@ class Feed:
         private: bool = False,
         description: str | None = None,
         feed: str | None = None,
-        feed_type: str | None = None,
         version: str | None = None,
         website: str | None = None,
         tags: Set[str] = None,
@@ -76,7 +75,6 @@ class Feed:
                             Public feed can be looked up by any X-ApiKey
             description (str | None): User defined description
             feed (str | None): This parameter can be set to any value
-            feed_type (FeedType | None): Type of feed (tag, anchor, or building)
             tags (Set[str]): Feeds can be filtered by the value of this meta-tag
             version (str | None): Can be set to any value
             website (str | None): Can be set to any value
@@ -92,14 +90,13 @@ class Feed:
         self.private = private
         self.description = description
         self.feed = feed
-        self.feed_type = feed_type
         self.version = version
         self.website = website
         self.tags = tags if tags else []
 
-        # Fields that are set automatically by the server
-        self.feed_id: str | None = kwargs.get("id", None)
-        self.feed_type: str | None = kwargs.get("type", None)
+        # Fields that are set automatically by the server (or subclasses)
+        self._id: str | None = kwargs.get("id", None)
+        self._type: str | None = kwargs.get("type", None)
         self.updated: str | None = kwargs.get("updated", None)
         self.created: str | None = kwargs.get("created", None)
         self.creator: str | None = kwargs.get("creator", None)
@@ -122,7 +119,7 @@ class Feed:
         return cls(rest_client, **data)
 
     @classmethod
-    def create(cls: Type[T], rest_client: RestClient, feed_data: dict) -> T:
+    def create(cls: Type[T], rest_client: RestClient, data: dict) -> T:
         """Create a new Feed.
 
         This class method will use the REST API to create a new Feed with the provided
@@ -131,12 +128,12 @@ class Feed:
 
         Args:
             rest_client (RestClient): The client to communicate with the REST API
-            feed_data (dict): A dictionary containing the data for creating a new Feed
+            data (dict): A dictionary containing the data for creating a new Feed
 
         Returns:
             An instance of the Feed class, representing the created feed
         """
-        data = rest_client.post(f"/{ENDPOINT}", feed_data)
+        data = rest_client.post(f"/{ENDPOINT}", data)
         return cls(rest_client, **data)
 
     def update(self) -> None:
@@ -146,12 +143,10 @@ class Feed:
         attributes have been set on this object.
         """
         attrs = self.get_attrs_dict()
-        data = self.rest_client.put(f"/{self.endpoint}/{self.feed_id}", attrs)
+        data = self.rest_client.put(f"/{self.endpoint}/{self._id}", attrs)
         # Update the Feed with the latest data from the server
         [
-            self.__setattr__(
-                "feed_id" if k == "id" else "feed_type" if k == "type" else k, v
-            )
+            self.__setattr__("_id" if k == "id" else "_type" if k == "type" else k, v)
             for k, v in data.items()
         ]
 
@@ -163,14 +158,17 @@ class Feed:
         client and the object's dictionary. It assumes attributes have been set on this
         object.
         """
-        if self.feed_id:
+        if self._id:
             self.update()
         else:
-            data = Feed.create(self.rest_client, self.get_attrs_dict()).get_attrs_dict()
+            instance = type(self).create(self.rest_client, self.get_attrs_dict())
+            data = instance.get_attrs_dict()
             # Update the Feed with the latest data from the server
             for k, v in data.items():
-                if k == "id" or k == "type":
-                    self.__setattr__(f"feed_{k}", v)
+                if k == "id":
+                    self.__setattr__("_id", v)
+                elif k == "type":
+                    self.__setattr__("_type", v)
                 else:
                     self.__setattr__(k, v)
 
@@ -179,17 +177,17 @@ class Feed:
 
         This will use the DELETE HTTP method and reset this feed to have no ID.
         """
-        self.rest_client.delete(f"/{self.endpoint}/{self.feed_id}")
-        self.feed_id = None
+        self.rest_client.delete(f"/{self.endpoint}/{self._id}")
+        self._id = None
 
-    def get_attrs_dict(self):
+    def get_attrs_dict(self) -> dict:
         """Get the attribute dictionary of the object.
 
         This method retrieves the attributes of the Feed and returns them as a dict.
         It excludes the rest_client attribute from the dictionary.
 
-        If the object has "feed_id" or "feed_type" attribute, they will be changed to
-        "id" and "type" respectively in the result.
+        If the object has "_id" or "_type" attribute, they will be changed to "id" and
+        "type" respectively in the result.
 
         Returns:
             dict: The dictionary containing the attributes of the object.
@@ -199,9 +197,15 @@ class Feed:
         class_attrs.pop("rest_client")
         class_attrs.pop("endpoint")
 
-        # feed_id/value is changed to not overwrite the builtin python "id" and "type"
-        for key in ["feed_id", "feed_type"]:
-            if key in class_attrs:
-                class_attrs[key.replace("feed_", "")] = class_attrs.pop(key)
+        # Subclasses don't have a type field, they are masked
+        if issubclass(type(self), Feed) and type(self) is not Feed:
+            class_attrs.pop("_type")
+
+        # We use _id to not overwrite the builtin python "id"
+        if "_id" in class_attrs:
+            class_attrs["id"] = class_attrs.pop("_id")
+        # We use _type to not overwrite the builtin python "type"
+        if "_type" in class_attrs:
+            class_attrs["type"] = class_attrs.pop("_type")
 
         return class_attrs
