@@ -17,17 +17,19 @@ class WebSocketClient:
     A helper class that handles connections to a WebSocket server, listens for messages,
     and executes a callback function upon receiving messages
     """
-    def __init__(self, url: str, on_message_callback: Callable):
+    def __init__(self, url: str, api_key: str, on_message_callback: Callable):
         """WebSocketClient Constructor
 
         Initializes the WebSocketClient.
 
         Args:
             url (str): The WebSocket server URL to connect to.
+            api_key (str): The API Key to authenticate to the WebSocket.
             on_message_callback (Callable): Callback function to execute when a message is received
         """
         self.logger = logging.getLogger(name=self.__class__.__name__)
         self.url = url
+        self.api_key = api_key
         self.on_message_callback = on_message_callback
         self.ws = None
         self.thread = None

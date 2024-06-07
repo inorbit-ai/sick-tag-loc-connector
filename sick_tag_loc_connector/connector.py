@@ -11,7 +11,7 @@ from inorbit_connector.connector import Connector
 
 from sick_tag_loc_connector.models import SickTagLocConfig
 from sick_tag_loc_connector.api.websocket import WebSocketClient
-from sick_tag_loc_connector.api.tag import Tag
+from sick_tag_loc_connector.api.tag import Tag, TagStreamWebSocketClient
 
 
 class SickTagLocConnector(Connector):
@@ -28,7 +28,7 @@ class SickTagLocConnector(Connector):
         self.config = config
         self.tag = tag
         super().__init__(self.assign_inorbit_id(self.tag._id), self.config)
-        self.poses_ws_client = None
+        self.connector_ws_client = None
 
     def connect(self) -> None:
         super()._connect()
@@ -51,32 +51,26 @@ class SickTagLocConnector(Connector):
         # NOTE(elvio.aruta): self.config.ws_api_url is not defined
         # It should be defined inside SickTagLocConfig
         # Creates a new WebSocketClient
-        self.poses_ws_client = WebSocketClient(
-            self.config.connector_config.sick, self._publish_poses_on_inorbit
+        self.connector_ws_client = TagStreamWebSocketClient(
+            self.config.connector_config.sick_tag_loc_ws_url,
+            self.config.connector_config.sick_tag_loc_ws_api_key,
+            self._publish_poses_on_inorbit,
+            self.tag,
         )
-        self.poses_ws_client.connect()
-        self.poses_ws_client.send(self._build_pose_subscription_messsage())
+        self.connector_ws_client.connect()
+        self.connector_ws_client.suscribe_to_tag_updates()
 
     def _get_feed_id(self) -> str:
         # TODO(elvio.aruta): get feed_id from Rest API
         feed_id = ""
         return feed_id
 
-    def _build_pose_subscription_messsage(self) -> str:
-        # TODO(elvio.aruta): get ws_api_key from SickTagLocConfig
-        # config is still not defined
-        ws_api_key = self.config.ws_api_key
-        feed_id = self._get_feed_id()
-        # TODO(elvio.aruta): Move this conversion elsewhere, maybe a subclass of WebSocketClient
-        # -> (TagStreamWebSocketClient)
-        message = f'{{"headers":{{"X-ApiKey":"{ws_api_key}"}}, "method":"subscribe", "resource":"/feeds/{feed_id}"}}'
-        return message
-
     def _unsubscribe_to_pose_updates(self) -> None:
-        if self.poses_ws_client:
-            self.poses_ws_client.close()
-            self.poses_ws_client = None
+        if self.connector_ws_client:
+            self.connector_ws_client.close()
+            self.connector_ws_client = None
 
+    # TODO(elvio.aruta): move this method inside TagStreamWebSocketClient
     def _parse_pose_from_ws(self, msg_from_ws):
         parsed_json = json.loads(msg_from_ws)
         # Extract X, Y from the message

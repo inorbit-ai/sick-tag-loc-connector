@@ -4,12 +4,13 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any, List
+from typing import Type, TypeVar, Set, Any, List, Callable, Union
 
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
 from sick_tag_loc_connector.api.feed import Feed
 from sick_tag_loc_connector.api.rest import FeedTypes
+from sick_tag_loc_connector.api.websocket import WebSocketClient
 
 # The endpoint name for tags
 ENDPOINT: str = "tags"
@@ -140,3 +141,14 @@ class Tag(Feed):
         """
         data = rest_client.post(f"/{ENDPOINT}", tag_data)
         return cls(rest_client, **data)
+
+
+class TagStreamWebSocketClient(WebSocketClient):
+    def __init__(self, url: str, api_key: str, on_message_callback: Callable, tag: Tag):
+        super().__init__(url, api_key, on_message_callback)
+        self.tag = tag
+
+    def suscribe_to_tag_updates(self) -> None:
+        # TODO(elvio.aruta): parametrize "method" and "resource" (possible values should be part of this class)
+        sub_message = f'{{"headers":{{"X-ApiKey":"{self.api_key}"}}, "method":"subscribe", "resource":"/feeds/{self.tag._id}"}}'
+        super().send(sub_message)

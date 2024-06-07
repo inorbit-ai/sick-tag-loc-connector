@@ -27,7 +27,7 @@ class SickTagLocConfigModel(BaseModel):
     # TODO(elvio.aruta): adding some "possible things to read from the config" here
     # this will be refactored later in other tasks
     sick_tag_loc_rest_api_url: HttpUrl
-    sick_tag_ws_url: WebsocketUrl
+    sick_tag_loc_ws_url: WebsocketUrl
     # NOTE(elvio.aruta): API key for ws and rest could be the same
     # in that case, leave just one "sick_tag_loc_api_key" and refactor accordingly
     sick_tag_loc_rest_api_key: str
