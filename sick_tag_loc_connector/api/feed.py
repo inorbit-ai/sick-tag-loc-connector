@@ -118,11 +118,11 @@ class Feed:
         data = rest_client.get(f"/{ENDPOINT}/{feed_id}")
         return cls(rest_client, **data)
 
-    @classmethod
-    def get_all(cls: Type[T], rest_client: RestClient) -> List[T]:
+    @staticmethod
+    def get_all(rest_client: RestClient) -> List["Feed"]:
         """Get all the feeds from the system.
 
-        This class method will attempt to load all the feeds from the SICK
+        This static method will attempt to load all the feeds from the SICK
         Tag-LOC system via the REST API.
 
         Args:
@@ -131,8 +131,9 @@ class Feed:
         Returns:
             A list with instances of the Feed class, representing the retrieved feeds.
         """
+        # TODO(elvio.aruta): add pagination to this get call
         data = rest_client.get(f"/{ENDPOINT}")
-        feed_list = [cls(rest_client, **feed) for feed in data["results"]]
+        feed_list = [Feed(rest_client, **feed) for feed in data["results"]]
         return feed_list
 
     @classmethod
