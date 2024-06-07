@@ -88,11 +88,10 @@ class SickTagLocConnector(Connector):
                 pose_data["x"] = datastream["current_value"].strip()
             elif datastream["id"] == "posY":
                 pose_data["y"] = datastream["current_value"].strip()
-        # NOTE(elvio.aruta): yaw? (probably not needed)
+        # Set yaw 0 by default, no orientation needed
+        pose_data["yaw"] = 0
         return pose_data
 
     def _publish_poses_on_inorbit(self, msg) -> None:
         pose = self._parse_pose_from_ws(msg)
-        # Add Edge SDK publish_pose() method from RobotSession
-        # self.inorbit_sess.publish_pose(**pose)
-        pass
+        self._robot_session.publish_pose(**pose)
