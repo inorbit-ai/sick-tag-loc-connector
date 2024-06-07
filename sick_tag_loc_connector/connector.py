@@ -94,4 +94,11 @@ class SickTagLocConnector(Connector):
 
     def _publish_poses_on_inorbit(self, msg) -> None:
         pose = self._parse_pose_from_ws(msg)
+        pose = self._apply_poses_transformation(pose)
         self._robot_session.publish_pose(**pose)
+
+    def _apply_poses_transformation(self) -> None:
+        # TODO(elvio.aruta): complete this method
+        # Method to transform (x,y) poses from RLTS system
+        # to the correct (x,y) poses displayed in InOrbit
+        pass
