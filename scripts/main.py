@@ -54,7 +54,7 @@ def main():
         exit(1)
 
     controller = SickTagLocMasterController(sic_tag_loc_config)
-    controller.start_controller()
+    controller.start()
 
     try:
         while True:
@@ -62,7 +62,7 @@ def main():
             sleep(0)
     except KeyboardInterrupt:
         logger.info("...exiting")
-        controller.stop_controller()
+        controller.stop()
 
 
 if __name__ == "__main__":

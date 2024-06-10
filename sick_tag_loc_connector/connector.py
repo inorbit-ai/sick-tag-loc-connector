@@ -14,6 +14,9 @@ from sick_tag_loc_connector.models import SickTagLocConfig
 from sick_tag_loc_connector.api.websocket import WebSocketClient
 from sick_tag_loc_connector.api.tag import Tag, TagStreamWebSocketClient
 
+# Constants
+RTLS_SICK_ID_PREFIX = "rtls-sick-"
+
 
 class SickTagLocConnector(Connector):
     """
@@ -61,9 +64,9 @@ class SickTagLocConnector(Connector):
         """
         # Create a new TagStreamWebSocketClient with the necessary parameters
         self.connector_ws_client = TagStreamWebSocketClient(
-            self.config.connector_config.sick_tag_loc_ws_url,
+            str(self.config.connector_config.sick_tag_loc_ws_url),
             self.config.connector_config.sick_tag_loc_ws_api_key,
-            self._publish_poses_on_inorbit,
+            self.publish_poses_on_inorbit,
             self.tag,
         )
 
@@ -101,7 +104,7 @@ class SickTagLocConnector(Connector):
         # NOTE (elvio.aruta): yaw? (probably not needed)
         return pose_data
 
-    def _publish_poses_on_inorbit(self, msg: Any) -> None:
+    def publish_poses_on_inorbit(self, msg: Any) -> None:
         """
         Publish pose data on InOrbit.
 
@@ -125,4 +128,4 @@ class SickTagLocConnector(Connector):
         """
         # NOTE (elvio.aruta): this is wrong and 100% must be changed
         # it doesn't ensure uniquess in the database
-        return f"rtls-sick-{tag_id}"
+        return f"{RTLS_SICK_ID_PREFIX}{tag_id}"

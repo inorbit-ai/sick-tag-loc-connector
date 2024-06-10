@@ -31,11 +31,11 @@ class SickTagLocMasterController:
         self.connectors = []
         self.config = config
         self.rest_client = RestClient(
-            self.config.connector_config.sick_tag_loc_rest_api_url,
+            str(self.config.connector_config.sick_tag_loc_rest_api_url),
             self.config.connector_config.sick_tag_loc_rest_api_key,
         )
 
-    def start_controller(self) -> None:
+    def start(self) -> None:
         """
         Start all SickTagLocConnectors managed by this controller.
 
@@ -45,7 +45,7 @@ class SickTagLocMasterController:
         for connector in self.connectors:
             connector.start()
 
-    def stop_controller(self) -> None:
+    def stop(self) -> None:
         """
         Stop all SickTagLocConnectors managed by this controller.
 

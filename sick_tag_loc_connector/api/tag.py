@@ -5,6 +5,7 @@
 
 # Standard
 from typing import Type, TypeVar, Set, Any, List, Callable
+from __future__ import annotations
 
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
@@ -108,7 +109,7 @@ class Tag(Feed):
         return cls(rest_client, **data)
 
     @staticmethod
-    def get_all(rest_client: RestClient) -> List["Tag"]:
+    def get_all(rest_client: RestClient) -> Set[Tag]:
         """Get all the Tags from the system
 
         This static method will attempt to load all the tags from the SICK
@@ -118,12 +119,12 @@ class Tag(Feed):
             rest_client (RestClient): The client to communicate with the REST API
 
         Returns:
-            An instance of the Tag class, representing the retrieved tag
+            A set of Tag instances, representing the retrieved tags
         """
         # TODO(elvio.aruta): add pagination to this get call
         data = rest_client.get(f"/{ENDPOINT}")
-        tag_list = [Tag(rest_client, **tag) for tag in data["results"]]
-        return tag_list
+        tag_set = {Tag(rest_client, **tag) for tag in data["results"]}
+        return tag_set
 
     @classmethod
     def create(cls: Type[T], rest_client: RestClient, tag_data: dict) -> T:
