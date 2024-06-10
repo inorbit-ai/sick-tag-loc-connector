@@ -88,8 +88,6 @@ class SickTagLocConnector(Connector):
                 pose_data["x"] = datastream["current_value"].strip()
             elif datastream["id"] == "posY":
                 pose_data["y"] = datastream["current_value"].strip()
-        # Set yaw 0 by default, no orientation needed
-        pose_data["yaw"] = 0
         return pose_data
 
     def _publish_poses_on_inorbit(self, msg) -> None:
@@ -97,7 +95,7 @@ class SickTagLocConnector(Connector):
         pose = self._apply_poses_transformation(pose)
         self._robot_session.publish_pose(**pose)
 
-    def _apply_poses_transformation(self) -> None:
+    def _apply_poses_transformation(self, pose) -> None:
         # TODO(elvio.aruta): complete this method
         # Method to transform (x,y) poses from RLTS system
         # to the correct (x,y) poses displayed in InOrbit
