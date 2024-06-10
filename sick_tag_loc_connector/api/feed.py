@@ -4,7 +4,8 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any
+from typing import Type, TypeVar, Set, Any, List
+from __future__ import annotations
 
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
@@ -117,6 +118,24 @@ class Feed:
         """
         data = rest_client.get(f"/{ENDPOINT}/{feed_id}")
         return cls(rest_client, **data)
+
+    @staticmethod
+    def get_all(rest_client: RestClient) -> Set[Feed]:
+        """Get all the feeds from the system.
+
+        This static method will attempt to load all the feeds from the SICK
+        Tag-LOC system via the REST API.
+
+        Args:
+            rest_client (RestClient): The client to communicate with the REST API
+
+        Returns:
+            A set of Feed instances, representing the retrieved feeds
+        """
+        # TODO(elvio.aruta): add pagination to this get call
+        data = rest_client.get(f"/{ENDPOINT}")
+        feed_set = {Feed(rest_client, **feed) for feed in data["results"]}
+        return feed_set
 
     @classmethod
     def create(cls: Type[T], rest_client: RestClient, data: dict) -> T:
