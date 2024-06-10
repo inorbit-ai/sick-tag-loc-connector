@@ -4,14 +4,13 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any, List
-from __future__ import annotations
+from typing import Type, TypeVar, Set, Any
 
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
 
 # The endpoint name for feeds
-ENDPOINT: str = "feeds"
+ENDPOINT: str = "/feeds"
 
 T = TypeVar("T", bound="Feed")
 
@@ -26,10 +25,10 @@ class Feed:
         endpoint (str): The endpoint name (defaults to "feeds")
         alias (str | None): User defined alias for feed (i.e., tag/anchor)
         title (str | None): Title is user defined name for feed
-        private (bool): If the feed should be private or public (default is False);
-                        If feed is private then it can only be looked up by request
-                        with X-ApiKey which belongs to user that created that feed;
-                        Public feed can be looked up by any X-ApiKey
+        private (str): If the feed should be private or public (default is "0");
+                       If feed is private then it can only be looked up by request with
+                       X-ApiKey which belongs to user that created that feed;
+                       Public feed can be looked up by any X-ApiKey
         description (str | None): User defined description
         feed (str | None): This parameter can be set to any value
         tags (Set[str]): Feeds can be filtered by the value of this meta-tag
@@ -49,15 +48,17 @@ class Feed:
         endpoint: str = ENDPOINT,
         alias: str | None = None,
         title: str | None = None,
-        private: bool = False,
+        private: str = "0",
         description: str | None = None,
         feed: str | None = None,
         version: str | None = None,
         website: str | None = None,
         tags: Set[str] = None,
-        # TODO(russell): plans (array of plans (buildings only))
         # TODO(russell): datastreams (array of datastreams)
-        # TODO(russell): location (location datatype in SICK),
+        # TODO(russell): location (location datatype in SICK)
+        # TODO(russell): zones (array)
+        # TODO(russell): creator_id (ID as string)
+        # TODO(russell): uuid (string)
         **kwargs: Any,
     ) -> None:
         """Initialize a new Feed instance with the given parameters.
@@ -70,10 +71,10 @@ class Feed:
             endpoint (str, optional): The endpoint name (defaults to "feeds")
             alias (str | None): User defined alias for feed (i.e., tag/anchor)
             title (str | None): Title is user defined name for feed
-            private (bool): If the feed should be private or public (default is False);
-                            If feed is private then it can only be looked up by request
-                            with X-ApiKey which belongs to user that created that feed;
-                            Public feed can be looked up by any X-ApiKey
+            private (str): If the feed should be private or public (default is "0");
+                           If feed is private then it can only be looked up by request
+                           with X-ApiKey which belongs to user that created that feed;
+                           Public feed can be looked up by any X-ApiKey
             description (str | None): User defined description
             feed (str | None): This parameter can be set to any value
             tags (Set[str]): Feeds can be filtered by the value of this meta-tag
@@ -81,6 +82,7 @@ class Feed:
             website (str | None): Can be set to any value
             **kwargs (Any): Additional keyword args that are typically set by the server
         """
+
         # Client-only fields
         self.rest_client = rest_client
         self.endpoint = endpoint
@@ -120,7 +122,7 @@ class Feed:
         return cls(rest_client, **data)
 
     @staticmethod
-    def get_all(rest_client: RestClient) -> Set[Feed]:
+    def get_all(rest_client: RestClient) -> Set[T]:
         """Get all the feeds from the system.
 
         This static method will attempt to load all the feeds from the SICK
@@ -215,10 +217,6 @@ class Feed:
         class_attrs = {k: v for k, v in self.__dict__.items()}
         class_attrs.pop("rest_client")
         class_attrs.pop("endpoint")
-
-        # Subclasses don't have a type field, they are masked
-        if issubclass(type(self), Feed) and type(self) is not Feed:
-            class_attrs.pop("_type")
 
         # We use _id to not overwrite the builtin python "id"
         if "_id" in class_attrs:

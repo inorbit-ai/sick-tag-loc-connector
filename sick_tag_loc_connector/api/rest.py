@@ -6,6 +6,7 @@
 # Standard
 import json
 from enum import Enum
+from urllib.parse import urljoin
 
 # Third-party
 import requests
@@ -66,7 +67,7 @@ class RestClient:
         Raises:
             requests.HTTPError: If the GET request returns a non-success status code.
         """
-        response = requests.get(f"{self.url}{endpoint}", headers=self.headers)
+        response = requests.get(urljoin(self.url, endpoint), headers=self.headers)
         response.raise_for_status()
         return response.json()
 
@@ -86,7 +87,7 @@ class RestClient:
             requests.HTTPError: If the GET request returns a non-success status code
         """
         response = requests.post(
-            f"{self.url}{endpoint}", headers=self.headers, data=json.dumps(data)
+            urljoin(self.url, endpoint), headers=self.headers, data=json.dumps(data)
         )
         response.raise_for_status()
         return response.json()
@@ -107,7 +108,7 @@ class RestClient:
             requests.HTTPError: If the GET request returns a non-success status code
         """
         response = requests.put(
-            f"{self.url}{endpoint}", headers=self.headers, data=json.dumps(data)
+            urljoin(self.url, endpoint), headers=self.headers, data=json.dumps(data)
         )
         response.raise_for_status()
         return response.json()
@@ -126,6 +127,6 @@ class RestClient:
         Raises:
             requests.HTTPError: If the GET request returns a non-success status code
         """
-        response = requests.delete(f"{self.url}{endpoint}", headers=self.headers)
+        response = requests.delete(urljoin(self.url, endpoint), headers=self.headers)
         response.raise_for_status()
         return response.json()
