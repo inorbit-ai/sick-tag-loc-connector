@@ -4,8 +4,7 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any, List, Callable
-from __future__ import annotations
+from typing import Type, TypeVar, Set, Any, Callable
 
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
@@ -14,7 +13,7 @@ from sick_tag_loc_connector.api.rest import FeedTypes
 from sick_tag_loc_connector.api.websocket import WebSocketClient
 
 # The endpoint name for tags
-ENDPOINT: str = "tags"
+ENDPOINT: str = "/tags"
 
 T = TypeVar("T", bound="Tag")
 
@@ -28,10 +27,12 @@ class Tag(Feed):
         rest_client (RestClient): The client used to communicate with the REST API
         endpoint (str): The endpoint name
         alias (str | None): User defined alias for feed (i.e., tag/anchor)
-        private (bool): If the Tag should be private or public (defaults to False)
+        private (str): If the feed should be private or public (default is "0");
+                       If feed is private then it can only be looked up by request with
+                       X-ApiKey which belongs to user that created that feed;
+                       Public feed can be looked up by any X-ApiKey
         description (str | None): User defined description for the Tag
         feed (str | None): This parameter can be set to any value
-        status (str | None): User can set to any value, e.g. live or frozen
         version (str | None): Can be set to any value
         website (str | None): Can be set to any value
         tags (Set[str]): Feeds can be filtered by the value of this meta-tag
@@ -47,15 +48,17 @@ class Tag(Feed):
         self,
         rest_client: RestClient,
         alias: str | None = None,
-        private: bool = False,
+        private: str = "0",
         description: str | None = None,
         feed: str | None = None,
-        status: str | None = None,
         version: str | None = None,
         website: str | None = None,
         tags: Set[str] = None,
         # TODO(russell): datastreams (array of datastreams)
-        # TODO(russell): location (location datatype in SICK),
+        # TODO(russell): location (location datatype in SICK)
+        # TODO(russell): zones (array)
+        # TODO(russell): creator_id (ID as string)
+        # TODO(russell): uuid (string)
         **kwargs: Any,
     ) -> None:
         """Initialize a new Tag instance with the given parameters.
@@ -66,10 +69,12 @@ class Tag(Feed):
         Args:
             rest_client (RestClient): The client used to communicate with the REST API
             alias (str | None): User defined alias for feed (i.e., tag/anchor)
-            private (bool): If the Tag should be private or public (defaults to False)
+            private (str): If the feed should be private or public (default is "0");
+                           If feed is private then it can only be looked up by request
+                           with X-ApiKey which belongs to user that created that feed;
+                           Public feed can be looked up by any X-ApiKey
             description (str | None): User defined description for the Tag
             feed (str | None): This parameter can be set to any value
-            status (str | None): User can set to any value, e.g. live or frozen
             version (str | None): Can be set to any value
             website (str | None): Can be set to any value
             tags (Set[str]): Feeds can be filtered by the value of this meta-tag
@@ -78,7 +83,6 @@ class Tag(Feed):
         super().__init__(
             rest_client=rest_client,
             endpoint=ENDPOINT,
-            type=FeedTypes.TAG.value,
             alias=alias,
             private=private,
             description=description,
@@ -89,7 +93,7 @@ class Tag(Feed):
             **kwargs,
         )
         # Fields that can be manually set
-        self.status = status
+        self._type = FeedTypes.TAG.value if not self._type else self._type
 
     @classmethod
     def get(cls: Type[T], rest_client: RestClient, tag_id: str) -> T:
@@ -109,7 +113,7 @@ class Tag(Feed):
         return cls(rest_client, **data)
 
     @staticmethod
-    def get_all(rest_client: RestClient) -> Set[Tag]:
+    def get_all(rest_client: RestClient) -> Set[T]:
         """Get all the Tags from the system
 
         This static method will attempt to load all the tags from the SICK

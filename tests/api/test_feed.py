@@ -10,8 +10,9 @@ from unittest.mock import Mock
 import pytest
 
 # InOrbit
-from sick_tag_loc_connector.api.feed import Feed, ENDPOINT
-from sick_tag_loc_connector.api.rest import RestClient, FeedTypes
+from sick_tag_loc_connector.api import Feed, RestClient
+from sick_tag_loc_connector.api.feed import ENDPOINT
+from sick_tag_loc_connector.api.rest import FeedTypes
 
 
 class TestFeed:
@@ -19,12 +20,12 @@ class TestFeed:
     @staticmethod
     def validate_feed_data(feed, mock_rest_client, feed_data):
         assert feed.rest_client is mock_rest_client
-        assert feed._id == "TestFeed"
+        assert feed._id == "1"
         assert feed.alias == feed_data["alias"]
         assert feed.private == feed_data["private"]
         assert feed.description == feed_data["description"]
         assert feed.feed == feed_data["feed"]
-        assert feed._type == FeedTypes.TAG.value
+        assert feed._type == FeedTypes.ANCHOR.value
         assert feed.version == feed_data["version"]
         assert feed.updated == feed_data["updated"]
         assert feed.created == feed_data["created"]
@@ -42,19 +43,21 @@ class TestFeed:
     @pytest.fixture
     def feed_data(self):
         return {
-            "id": "TestFeed",
-            "alias": "my_alias",
-            "private": True,
-            "description": "my_description",
-            "feed": "my_feed",
-            "type": FeedTypes.TAG.value,
-            "version": "my_version",
-            "website": "my_website",
-            "tags": {"tag1", "tag2"},
-            "title": "my_title",
-            "updated": "my_updated",
-            "created": "my_created",
-            "creator": "my_creator",
+            "id": "1",
+            "alias": "A6",
+            "title": "0xE8EB1B3C0FE5",
+            "private": "0",
+            "description": "pizza-bot",
+            "feed": "1.0.0",
+            "updated": "2023-12-19 00:12:00.197192",
+            "created": "2023-12-18 20:58:35.722557",
+            "creator": "admin",
+            "version": "1.0.0",
+            "website": "https://pizza.com",
+            "type": "anchor",
+            "tags": [
+                "#robots"
+            ]
         }
 
     @pytest.fixture
@@ -73,7 +76,7 @@ class TestFeed:
         assert feed.rest_client is mock_rest_client
         assert feed.endpoint == ENDPOINT
         assert feed.alias is None
-        assert feed.private is False
+        assert feed.private == "0"
         assert feed.description is None
         assert feed.feed is None
         assert feed.tags == []
@@ -93,25 +96,25 @@ class TestFeed:
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_class_method_get(self, mock_rest_client, mock_feed, feed_data):
-        feed = Feed.get(mock_rest_client, "TestFeed")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/TestFeed")
+        feed = Feed.get(mock_rest_client, "1")
+        mock_rest_client.get.assert_called_once_with(f"{ENDPOINT}/1")
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_class_method_get_invalid__id(self, mock_rest_client):
         with pytest.raises(Exception):
             Feed.get(mock_rest_client, "invalid__id")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/invalid__id")
+        mock_rest_client.get.assert_called_once_with(f"{ENDPOINT}/invalid__id")
 
     def test_class_method_create(self, mock_rest_client, mock_feed, feed_data):
         feed = Feed.create(mock_rest_client, feed_data)
-        mock_rest_client.post.assert_called_once_with(f"/{ENDPOINT}", feed_data)
+        mock_rest_client.post.assert_called_once_with(f"{ENDPOINT}", feed_data)
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_update(self, mock_rest_client, mock_feed):
         original_data = mock_feed.get_attrs_dict()
         updated_data = {
             "alias": "update_feed_alias",
-            "private": True,
+            "private": "1",
             "description": "update_feed_description",
             "feed": "update_feed_feed",
             "version": "update_feed_version",
@@ -130,7 +133,7 @@ class TestFeed:
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/TestFeed", expected_data
+            f"{ENDPOINT}/1", expected_data
         )
 
     def test_save_with_existing_id(self, mock_rest_client, mock_feed):
@@ -156,7 +159,7 @@ class TestFeed:
         assert mock_feed._type is expected_data["type"]
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/TestFeed", expected_data
+            f"{ENDPOINT}/1", expected_data
         )
 
     def test_save_with_no_id(self, mock_rest_client, mock_feed, feed_data):
@@ -182,14 +185,14 @@ class TestFeed:
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.post.assert_called_once_with(
-            f"/{ENDPOINT}", expected_data
+            f"{ENDPOINT}", expected_data
         )
 
     def test_delete(self, mock_feed):
-        assert mock_feed._id == "TestFeed"
+        assert mock_feed._id == "1"
         mock_feed.delete()
         # noinspection PyUnresolvedReferences
-        mock_feed.rest_client.delete.assert_called_once_with(f"/{ENDPOINT}/TestFeed")
+        mock_feed.rest_client.delete.assert_called_once_with(f"{ENDPOINT}/1")
         assert mock_feed._id is None
 
     def test_get_attrs_dict(self, mock_feed, feed_data):
