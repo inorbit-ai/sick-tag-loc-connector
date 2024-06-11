@@ -101,7 +101,6 @@ class SickTagLocConnector(Connector):
                 pose_data["x"] = datastream["current_value"].strip()
             elif ds_id == "posY":
                 pose_data["y"] = datastream["current_value"].strip()
-        # NOTE (elvio.aruta): yaw? (probably not needed)
         return pose_data
 
     def publish_poses_on_inorbit(self, msg: Any) -> None:
@@ -112,9 +111,15 @@ class SickTagLocConnector(Connector):
             msg (Any): The message received from the WebSocket.
         """
         pose = self._parse_pose_from_ws(msg)
-        # Add Edge SDK publish_pose() method from RobotSession
-        # self.inorbit_sess.publish_pose(**pose)
-        pass
+        pose = self._apply_poses_transformation(pose)
+        self._robot_session.publish_pose(**pose)
+
+    def _apply_poses_transformation(self, pose) -> dict:
+        # TODO(elvio.aruta): complete this method
+        # Method to transform (x,y) poses from RLTS system
+        # to the correct (x,y) poses displayed in InOrbit
+        # TODO: (elvio.aruta): Create a data structure for pose
+        return pose
 
     def _assign_inorbit_id(self, tag_id: str) -> str:
         """
