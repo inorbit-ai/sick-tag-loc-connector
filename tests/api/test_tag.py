@@ -10,8 +10,9 @@ from unittest.mock import Mock
 import pytest
 
 # InOrbit
+from sick_tag_loc_connector.api import Tag, RestClient
 from sick_tag_loc_connector.api.rest import FeedTypes
-from sick_tag_loc_connector.api.tag import Tag, RestClient, ENDPOINT
+from sick_tag_loc_connector.api.tag import ENDPOINT
 
 
 class TestTag:
@@ -126,7 +127,7 @@ class TestTag:
         mock_tag.update()
         # noinspection PyUnresolvedReferences
         mock_tag.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/12", expected_data
+            f"{ENDPOINT}/12", expected_data
         )
         assert "updated-now" == mock_tag.updated
         assert mock_tag._id is expected_data["id"]
@@ -150,7 +151,7 @@ class TestTag:
         mock_tag.save()
         # noinspection PyUnresolvedReferences
         mock_tag.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/12", expected_data
+            f"{ENDPOINT}/12", expected_data
         )
         assert "updated-now" == mock_tag.updated
         assert mock_tag._id is expected_data["id"]
@@ -182,7 +183,7 @@ class TestTag:
         assert mock_tag._id == "12"
         mock_tag.delete()
         # noinspection PyUnresolvedReferences
-        mock_tag.rest_client.delete.assert_called_once_with(f"/{ENDPOINT}/12")
+        mock_tag.rest_client.delete.assert_called_once_with(f"{ENDPOINT}/12")
         assert mock_tag._id is None
 
     def test_get_attrs_dict(self, mock_tag, tag_data):

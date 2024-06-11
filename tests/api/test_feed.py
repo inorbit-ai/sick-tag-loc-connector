@@ -10,8 +10,9 @@ from unittest.mock import Mock
 import pytest
 
 # InOrbit
-from sick_tag_loc_connector.api.feed import Feed, ENDPOINT
-from sick_tag_loc_connector.api.rest import RestClient, FeedTypes
+from sick_tag_loc_connector.api import Feed, RestClient
+from sick_tag_loc_connector.api.feed import ENDPOINT
+from sick_tag_loc_connector.api.rest import FeedTypes
 
 
 class TestFeed:
@@ -46,7 +47,7 @@ class TestFeed:
             "alias": "A6",
             "title": "0xE8EB1B3C0FE5",
             "private": "0",
-            "description": "pizzabot",
+            "description": "pizza-bot",
             "feed": "1.0.0",
             "updated": "2023-12-19 00:12:00.197192",
             "created": "2023-12-18 20:58:35.722557",
@@ -96,17 +97,17 @@ class TestFeed:
 
     def test_class_method_get(self, mock_rest_client, mock_feed, feed_data):
         feed = Feed.get(mock_rest_client, "1")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/1")
+        mock_rest_client.get.assert_called_once_with(f"{ENDPOINT}/1")
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_class_method_get_invalid__id(self, mock_rest_client):
         with pytest.raises(Exception):
             Feed.get(mock_rest_client, "invalid__id")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/invalid__id")
+        mock_rest_client.get.assert_called_once_with(f"{ENDPOINT}/invalid__id")
 
     def test_class_method_create(self, mock_rest_client, mock_feed, feed_data):
         feed = Feed.create(mock_rest_client, feed_data)
-        mock_rest_client.post.assert_called_once_with(f"/{ENDPOINT}", feed_data)
+        mock_rest_client.post.assert_called_once_with(f"{ENDPOINT}", feed_data)
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_update(self, mock_rest_client, mock_feed):
@@ -132,7 +133,7 @@ class TestFeed:
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/1", expected_data
+            f"{ENDPOINT}/1", expected_data
         )
 
     def test_save_with_existing_id(self, mock_rest_client, mock_feed):
@@ -158,7 +159,7 @@ class TestFeed:
         assert mock_feed._type is expected_data["type"]
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/1", expected_data
+            f"{ENDPOINT}/1", expected_data
         )
 
     def test_save_with_no_id(self, mock_rest_client, mock_feed, feed_data):
@@ -184,14 +185,14 @@ class TestFeed:
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.post.assert_called_once_with(
-            f"/{ENDPOINT}", expected_data
+            f"{ENDPOINT}", expected_data
         )
 
     def test_delete(self, mock_feed):
         assert mock_feed._id == "1"
         mock_feed.delete()
         # noinspection PyUnresolvedReferences
-        mock_feed.rest_client.delete.assert_called_once_with(f"/{ENDPOINT}/1")
+        mock_feed.rest_client.delete.assert_called_once_with(f"{ENDPOINT}/1")
         assert mock_feed._id is None
 
     def test_get_attrs_dict(self, mock_feed, feed_data):

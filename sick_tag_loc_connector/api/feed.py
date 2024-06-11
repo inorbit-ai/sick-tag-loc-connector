@@ -118,7 +118,7 @@ class Feed:
         Returns:
             An instance of the Feed class, representing the retrieved feed
         """
-        data = rest_client.get(f"/{ENDPOINT}/{feed_id}")
+        data = rest_client.get(f"{ENDPOINT}/{feed_id}")
         return cls(rest_client, **data)
 
     @staticmethod
@@ -135,7 +135,7 @@ class Feed:
             A set of Feed instances, representing the retrieved feeds
         """
         # TODO(elvio.aruta): add pagination to this get call
-        data = rest_client.get(f"/{ENDPOINT}")
+        data = rest_client.get(ENDPOINT)
         feed_set = {Feed(rest_client, **feed) for feed in data["results"]}
         return feed_set
 
@@ -154,7 +154,7 @@ class Feed:
         Returns:
             An instance of the Feed class, representing the created feed
         """
-        data = rest_client.post(f"/{ENDPOINT}", data)
+        data = rest_client.post(ENDPOINT, data)
         return cls(rest_client, **data)
 
     def update(self) -> None:
@@ -164,7 +164,7 @@ class Feed:
         attributes have been set on this object.
         """
         attrs = self.get_attrs_dict()
-        data = self.rest_client.put(f"/{self.endpoint}/{self._id}", attrs)
+        data = self.rest_client.put(f"{self.endpoint}/{self._id}", attrs)
         # Update the Feed with the latest data from the server
         [
             self.__setattr__("_id" if k == "id" else "_type" if k == "type" else k, v)
@@ -198,7 +198,7 @@ class Feed:
 
         This will use the DELETE HTTP method and reset this feed to have no ID.
         """
-        self.rest_client.delete(f"/{self.endpoint}/{self._id}")
+        self.rest_client.delete(f"{self.endpoint}/{self._id}")
         self._id = None
 
     def get_attrs_dict(self) -> dict:
