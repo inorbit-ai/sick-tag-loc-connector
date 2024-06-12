@@ -11,21 +11,20 @@ import pytest
 
 # InOrbit
 from sick_tag_loc_connector.api import Feed, RestClient
-from sick_tag_loc_connector.api.feed import ENDPOINT
-from sick_tag_loc_connector.api.rest import FeedTypes
+from sick_tag_loc_connector.api.feed import ENDPOINT, SICK_RTLS_ID_PREFIX
 
 
 class TestFeed:
 
     @staticmethod
-    def validate_feed_data(feed, mock_rest_client, feed_data):
-        assert feed.rest_client is mock_rest_client
-        assert feed._id == "1"
+    def validate_feed_data(feed, rest_client, feed_data):
+        assert feed.rest_client is rest_client
+        assert feed._id == feed_data["id"]
         assert feed.alias == feed_data["alias"]
         assert feed.private == feed_data["private"]
         assert feed.description == feed_data["description"]
         assert feed.feed == feed_data["feed"]
-        assert feed._type == FeedTypes.ANCHOR.value
+        assert feed._type == feed_data["type"]
         assert feed.version == feed_data["version"]
         assert feed.updated == feed_data["updated"]
         assert feed.created == feed_data["created"]
@@ -55,9 +54,7 @@ class TestFeed:
             "version": "1.0.0",
             "website": "https://pizza.com",
             "type": "anchor",
-            "tags": [
-                "#robots"
-            ]
+            "tags": ["#robots"],
         }
 
     @pytest.fixture
@@ -184,9 +181,7 @@ class TestFeed:
         assert id(mock_feed) is not mock_feed._id
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
-        mock_feed.rest_client.post.assert_called_once_with(
-            f"{ENDPOINT}", expected_data
-        )
+        mock_feed.rest_client.post.assert_called_once_with(f"{ENDPOINT}", expected_data)
 
     def test_delete(self, mock_feed):
         assert mock_feed._id == "1"
@@ -209,3 +204,32 @@ class TestFeed:
         assert "rest_client" not in mock_feed.get_attrs_dict()
         assert "endpoint" not in mock_feed.get_attrs_dict()
         assert mock_feed.get_attrs_dict() == expected_data
+
+    def test_get_all(self, feed_data):
+        feed_data_2 = feed_data.copy()
+        for key, value in feed_data_2.items():
+            if isinstance(value, str):
+                feed_data_2[key] = value + "_test"
+            elif isinstance(value, list):
+                feed_data_2[key] = [item + "_test" for item in feed_data_2[key]]
+
+        rest_client = Mock(spec=RestClient)
+        rest_client.get.return_value = {"results": [feed_data, feed_data_2]}
+
+        feeds = Feed.get_all(rest_client)
+        assert len(feeds) == 2
+
+        for feed in feeds:
+            if feed._id.endswith("_test"):
+                self.validate_feed_data(feed, rest_client, feed_data_2)
+            else:
+                self.validate_feed_data(feed, rest_client, feed_data)
+
+    def test_get_id(self, mock_feed):
+        assert mock_feed.get_id() == mock_feed._id
+
+    def test_get_inorbit_id(self, mock_feed):
+        expected = (
+            f"{SICK_RTLS_ID_PREFIX}-{mock_feed._type}:{mock_feed._id}:{mock_feed.title}"
+        )
+        assert mock_feed.get_inorbit_id() == expected

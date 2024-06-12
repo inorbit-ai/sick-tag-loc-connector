@@ -40,6 +40,11 @@ setup(
     ],
     description="A Python connector for the SICK Tag-LOC RTLS into InOrbit.",
     download_url=f"{GITHUB_REPO_URL}/archive/refs/tags/{VERSION}.zip",
+    entry_points={
+        "console_scripts": [
+            "sick-tag-loc-connector=sick_tag_loc_connector.main:start",
+        ]
+    },
     install_requires=install_requirements,
     keywords=["inorbit", "robops", "robotics"],
     license="MIT",

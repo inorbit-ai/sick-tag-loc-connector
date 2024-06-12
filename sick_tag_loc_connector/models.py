@@ -3,42 +3,148 @@
 # License: MIT License
 # Copyright 2024 InOrbit, Inc.
 
-# InOrbit
-from inorbit_connector.models import InorbitConnectorConfig
+# Standard
+import os
+from urllib.parse import urlunparse
 
-# Third-party
+# Third Party
+from inorbit_connector.models import InorbitConnectorConfig
 from inorbit_connector.utils import read_yaml
-from pydantic import BaseModel, HttpUrl, WebsocketUrl
+from pydantic import BaseModel, HttpUrl, field_validator
+
+# Accepted/default values
+CONNECTOR_TYPE = "sick_tag_loc"
+DEFAULT_RTLS_REST_API_PORT = 8080
+DEFAULT_RTLS_WS_PORT = 80
+SICK_RTLS_REST_ENDPOINT = "/sensmapserver/api"
 
 
 class SickTagLocConfigModel(BaseModel):
-    """A class representing the Instock abstract Model.
+    """A class representing the SICK Tag-LOC attributes.
 
     SickTagLocConfigModel class is responsible for holding the configuration values
-    related to the SICK Tag LOC API. It inherits from the BaseModel class.
+    related to the SICK Tag-LOC API. It inherits from the BaseModel class.
 
-    TODO(elvio.aruta98): add attributes
     Attributes:
-        -
-        -
-        -
-        -
+        sick_rtls_http_server_address (HttpUrl): The URL of the SICK RTLS server
+        sick_rtls_rest_api_port (int, optional): The port SICK RTLS REST API
+        sick_rtls_websocket_port (int, optional): The port SICK RTLS WebSocket
+        sick_rtls_api_key (str | None, optional): The SICK RTLS API key
     """
-    # TODO(elvio.aruta): adding some "possible things to read from the config" here
-    # this will be refactored later in other tasks
-    sick_tag_loc_rest_api_url: HttpUrl
-    sick_tag_loc_ws_url: WebsocketUrl
-    # NOTE(elvio.aruta): API key for ws and rest could be the same
-    # in that case, leave just one "sick_tag_loc_api_key" and refactor accordingly
-    sick_tag_loc_rest_api_key: str
-    sick_tag_loc_ws_api_key: str
 
-    pass
+    sick_rtls_http_server_address: HttpUrl
+    sick_rtls_rest_api_port: int = DEFAULT_RTLS_REST_API_PORT
+    sick_rtls_websocket_port: int = DEFAULT_RTLS_WS_PORT
+    sick_rtls_api_key: str = os.getenv("SICK_RTLS_API_KEY")
+
+    # noinspection PyMethodParameters
+    @field_validator("sick_rtls_rest_api_port", "sick_rtls_websocket_port")
+    def port_validation(cls, value: int) -> int:
+        """Validates the SICK API ports.
+
+        Validates the port is greater than 0 and less than 65536.
+
+        Args:
+            value (int): The SICK API port to validate
+
+        Returns:
+            str: The validated SICK API port
+
+        Raises:
+            ValueError: If the SICK API port
+        """
+
+        if value < 1 or value > 65535:
+            raise ValueError("Invalid port")
+        return value
+
+    # noinspection PyMethodParameters
+    @field_validator("sick_rtls_api_key")
+    def check_whitespace(cls, value: str) -> str:
+        """Check if the sick_rtls_api_key contains whitespace.
+
+        This is used for the sick_rtls_api_key.
+
+        Args:
+            value (str): The sick_rtls_api_key to be checked
+
+        Raises:
+            ValueError: If the sick_rtls_api_key contains whitespace
+
+        Returns:
+            str: The given value if it does not contain whitespaces
+        """
+
+        if any(char.isspace() for char in value):
+            raise ValueError("Whitespaces are not allowed")
+        return value
+
+    def get_rest_api_url(self):
+        """Returns the REST API URL for the Sick RTLS system.
+
+        This will be built using the components in this model.
+
+        Returns:
+            The REST API URL as a string
+        """
+        scheme = self.sick_rtls_http_server_address.scheme
+        netloc = (
+            f"{self.sick_rtls_http_server_address.host}:{self.sick_rtls_rest_api_port}"
+        )
+        url = SICK_RTLS_REST_ENDPOINT
+
+        components = (scheme, netloc, url, "", "", "")
+        return urlunparse(components)
+
+    def get_websocket_url(self):
+        """Returns the REST API URL for the Sick RTLS system.
+
+        This will be built using the components in this model.
+
+        Returns:
+            The REST API URL as a string
+        """
+        scheme = "ws"
+        netloc = (
+            f"{self.sick_rtls_http_server_address.host}:{self.sick_rtls_websocket_port}"
+        )
+
+        components = (scheme, netloc, "", "", "", "")
+        return urlunparse(components)
 
 
 class SickTagLocConfig(InorbitConnectorConfig):
+    """SICK Tag-LOC connector configuration schema.
+
+    The main configuration for a SICK Tag-LOC connector instance.
+
+    Attributes:
+        connector_config (SickTagLocConfigModel): The configuration parameters
+    """
+
     connector_config: SickTagLocConfigModel
-    pass
+
+    # noinspection PyMethodParameters
+    @field_validator("connector_type")
+    def check_connector_type(cls, connector_type: str) -> str:
+        """Validate the connector type.
+
+        This should always be equal to the pre-defined constant.
+
+        Args:
+            connector_type (str): The defined connector type passed in
+
+        Returns:
+            str: The validated connector type
+
+        Raises:
+            ValueError: If the connector type is not equal to the pre-defined constant
+        """
+        if connector_type != CONNECTOR_TYPE:
+            raise ValueError(
+                f"Expected connector type '{CONNECTOR_TYPE}' not '{connector_type}'"
+            )
+        return connector_type
 
 
 def load_and_validate(config_filename: str) -> SickTagLocConfig:
@@ -48,16 +154,14 @@ def load_and_validate(config_filename: str) -> SickTagLocConfig:
 
     Args:
         config_filename (str): The YAML file to load the configuration from
+
     Returns:
         SickTagLocConfig: The SICK Tag Loc configuration object with the loaded values
+
     Raises:
         FileNotFoundError: If the configuration file does not exist
         IndexError: If the configuration file does not contain the robot_id
         yaml.YAMLError: If the configuration file is not valid for YAML
     """
-    # TODO(elvio.aruta98): this could change after some iterations over this connector,
-    #                      don't take this like "the truth"
-    # Since this is maybe loaded from the controller, I don't think we want to use a
-    # robot id, probably a list of robotIds inside a configuration yaml
     config = read_yaml(config_filename)
     return SickTagLocConfig(**config)

@@ -18,10 +18,10 @@ from sick_tag_loc_connector.api.tag import ENDPOINT
 class TestTag:
 
     @staticmethod
-    def validate_tag_data(tag, mock_rest_client, tag_data):
-        assert tag.rest_client is mock_rest_client
+    def validate_tag_data(tag, rest_client, tag_data):
+        assert tag.rest_client is rest_client
         assert tag._id == tag_data["id"]
-        assert tag._type == FeedTypes.TAG.value
+        assert tag._type == tag_data["type"]
         assert tag.alias == tag_data["alias"]
         assert tag.private == tag_data["private"]
         assert tag.description == tag_data["description"]
@@ -55,9 +55,7 @@ class TestTag:
             "version": "1.0.0",
             "website": "https://pizza.com",
             "type": "tag",
-            "tags": [
-                "#yolo"
-            ]
+            "tags": ["#yolo"],
         }
 
     @pytest.fixture
@@ -199,3 +197,23 @@ class TestTag:
         assert "rest_client" not in mock_tag.get_attrs_dict()
         assert "endpoint" not in mock_tag.get_attrs_dict()
         assert mock_tag.get_attrs_dict() == expected_data
+
+    def test_get_all(self, tag_data):
+        tag_data_2 = tag_data.copy()
+        for key, value in tag_data_2.items():
+            if isinstance(value, list):
+                tag_data_2[key] = [item + "_test" for item in tag_data_2[key]]
+            elif isinstance(value, str):
+                tag_data_2[key] = value + "_test"
+
+        rest_client = Mock(spec=RestClient)
+        rest_client.get.return_value = {"results": [tag_data, tag_data_2]}
+
+        feeds = Tag.get_all(rest_client)
+        assert len(feeds) == 2
+
+        for feed in feeds:
+            if feed._id.endswith("_test"):
+                self.validate_tag_data(feed, rest_client, tag_data_2)
+            else:
+                self.validate_tag_data(feed, rest_client, tag_data)
