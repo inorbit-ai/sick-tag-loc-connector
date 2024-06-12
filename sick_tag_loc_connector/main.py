@@ -3,15 +3,21 @@
 # License: MIT License
 # Copyright 2024 InOrbit, Inc.
 
+# Standard
 import argparse
 import logging
 from time import sleep
 
+# InOrbit
 from sick_tag_loc_connector.controller import SickTagLocMasterController
 from sick_tag_loc_connector.models import load_and_validate
 
 
-def main():
+def start():
+    """The SICK Tag-LOC Connector
+
+    This method is the entry point for starting the application.
+    """
     logger = logging.getLogger(__name__)
 
     parser = argparse.ArgumentParser()
@@ -66,4 +72,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    start()

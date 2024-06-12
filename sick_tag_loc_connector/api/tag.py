@@ -13,9 +13,9 @@ from sick_tag_loc_connector.api.rest import FeedTypes
 from sick_tag_loc_connector.api.websocket import WebSocketClient
 
 # The endpoint name for tags
-ENDPOINT: str = "/tags"
-
-T = TypeVar("T", bound="Tag")
+ENDPOINT: str = "tags"
+# Type hint definition
+T: TypeVar = TypeVar("T", bound="Tag")
 
 
 class Tag(Feed):
@@ -153,7 +153,8 @@ class TagStreamWebSocketClient(WebSocketClient):
     """
     A WebSocket client specifically for subscribing to tag updates.
 
-    Inherits from WebSocketClient and adds functionality to handle tag-specific subscriptions.
+    Inherits from WebSocketClient and adds functionality to handle tag-specific
+    subscriptions.
     """
 
     def __init__(self, url: str, api_key: str, on_message_callback: Callable, tag: Tag):
@@ -163,14 +164,16 @@ class TagStreamWebSocketClient(WebSocketClient):
         Args:
             url (str): The URL for the WebSocket connection.
             api_key (str): The API key for authentication.
-            on_message_callback (Callable): The callback function to handle incoming messages.
+            on_message_callback (Callable): The callback function to handle incoming
+            messages.
             tag (Tag): The Tag instance to subscribe to updates for.
 
         NOTE(elvio.aruta):
-            If the API key is the same for both REST and WebSocket clients, consider reading the key
-            directly from the tag instance.
-            If that's the case, refactor the Tag class to add subscribe(callback) method and make it
-            return a TagStreamWebSocketClient() already subscribed to the updates.
+            If the API key is the same for both REST and WebSocket clients, consider
+            reading the key directly from the tag instance.
+            If that's the case, refactor the Tag class to add subscribe(callback) method
+            and make it return a TagStreamWebSocketClient() already subscribed to the
+            updates.
         """
         super().__init__(url, api_key, on_message_callback)
         self.tag = tag
@@ -179,14 +182,15 @@ class TagStreamWebSocketClient(WebSocketClient):
         """
         Subscribe to updates for the specific tag associated with this client.
 
-        This method constructs a subscription message and sends it via the WebSocket connection.
+        This method constructs a subscription message and sends it via the WebSocket
+        connection.
 
         NOTE(elvio.aruta):
-            The "method" and "resource" in the message should be parameterized. Possible values
-            should be part of this class (add new Enums)
+            The "method" and "resource" in the message should be parameterized. Possible
+            values should be part of this class (add new Enums)
         """
         sub_message = (
             f'{{"headers":{{"X-ApiKey":"{self.api_key}"}}, "method":"subscribe", '
-            f'"resource":"/feeds/{self.tag._id}"}}'
+            f'"resource":"{ENDPOINT}/{self.tag.get_id()}"}}'
         )
         super().send(sub_message)

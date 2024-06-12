@@ -6,13 +6,12 @@
 # Standard
 import json
 from enum import Enum
-from urllib.parse import urljoin
 
 # Third-party
 import requests
 
 # The global endpoint name for streams
-STREAMS_ENDPOINT: str = "/streams"
+STREAMS_ENDPOINT: str = "streams"
 
 
 class FeedTypes(Enum):
@@ -67,7 +66,7 @@ class RestClient:
         Raises:
             requests.HTTPError: If the GET request returns a non-success status code.
         """
-        response = requests.get(urljoin(self.url, endpoint), headers=self.headers)
+        response = requests.get(f"{self.url}{endpoint}", headers=self.headers)
         response.raise_for_status()
         return response.json()
 
@@ -87,7 +86,7 @@ class RestClient:
             requests.HTTPError: If the GET request returns a non-success status code
         """
         response = requests.post(
-            urljoin(self.url, endpoint), headers=self.headers, data=json.dumps(data)
+            f"{self.url}{endpoint}", headers=self.headers, data=json.dumps(data)
         )
         response.raise_for_status()
         return response.json()
@@ -108,7 +107,7 @@ class RestClient:
             requests.HTTPError: If the GET request returns a non-success status code
         """
         response = requests.put(
-            urljoin(self.url, endpoint), headers=self.headers, data=json.dumps(data)
+            f"{self.url}{endpoint}", headers=self.headers, data=json.dumps(data)
         )
         response.raise_for_status()
         return response.json()
@@ -127,6 +126,6 @@ class RestClient:
         Raises:
             requests.HTTPError: If the GET request returns a non-success status code
         """
-        response = requests.delete(urljoin(self.url, endpoint), headers=self.headers)
+        response = requests.delete(f"{self.url}{endpoint}", headers=self.headers)
         response.raise_for_status()
         return response.json()

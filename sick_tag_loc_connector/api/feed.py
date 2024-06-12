@@ -10,9 +10,12 @@ from typing import Type, TypeVar, Set, Any
 from sick_tag_loc_connector.api import RestClient
 
 # The endpoint name for feeds
-ENDPOINT: str = "/feeds"
+ENDPOINT: str = "feeds"
 
-T = TypeVar("T", bound="Feed")
+T: TypeVar = TypeVar("T", bound="Feed")
+
+# Prefix to show this is a sick-rtls "robot"
+SICK_RTLS_ID_PREFIX: str = "sick-rtls"
 
 
 class Feed:
@@ -226,3 +229,34 @@ class Feed:
             class_attrs["type"] = class_attrs.pop("_type")
 
         return class_attrs
+
+    def get_id(self) -> str:
+        """Get the ID of the Feed.
+
+        This is a helper method to access a "private" variable.
+
+        Returns:
+            str: The ID of the Feed
+        """
+        return self._id
+
+    def get_type(self) -> str:
+        """Get the type of the Feed.
+
+        This is a helper method to access a "private" variable.
+
+        Returns:
+            str: The type of the Feed
+        """
+        return self._type
+
+    def get_inorbit_id(self) -> str:
+        """Get a unique InOrbit ID to the tag.
+
+        This will be in the format "{SICK_RTLS_ID_PREFIX}:{type}:{id}:{title}".
+
+        Returns:
+            str: The assigned InOrbit ID.
+        """
+        # TODO(elvio/russell): title seems to be a unique address, this *should* be safe
+        return f"{SICK_RTLS_ID_PREFIX}-{self._type}:{self._id}:{self.title}"

@@ -9,7 +9,7 @@ from sick_tag_loc_connector.api.websocket import WebSocketClient
 class TestWebSocketClient:
     @pytest.fixture
     def ws_client(self):
-        return WebSocketClient("ws://test-url", MagicMock())
+        return WebSocketClient("ws://test-url", "key", MagicMock())
 
     @pytest.fixture
     def mock_websocket(self):
@@ -17,6 +17,7 @@ class TestWebSocketClient:
 
     def test_init(self, ws_client):
         assert ws_client.url == "ws://test-url"
+        assert ws_client.api_key == "key"
         assert isinstance(ws_client.on_message_callback, MagicMock)
         assert isinstance(ws_client.logger, logging.Logger)
         assert ws_client.ws is None
