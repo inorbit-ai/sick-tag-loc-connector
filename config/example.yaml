@@ -12,3 +12,23 @@ connector_config:
   sick_rtls_http_server_address: http://192.168.1.249/
   sick_rtls_rest_api_port: 8080
   sick_rtls_websocket_port: 8080
+  # Custom footprint specs
+  footprint_specs:
+    pallet:
+      footprint:
+        - x: -0.5
+          y: -0.5
+        - x: 0.3
+          y: -0.5
+        - x: 0.3
+          y: 0.5
+        - x: -0.5
+          y: 0.5
+      radius: 0.2
+    cable_spool:
+      radius: 0.2
+  # Assign non default footprints to tracked objects
+  tag_footprints:
+    tagId1: pallet
+    tagId2: pallet
+    tagId3: cable_spool

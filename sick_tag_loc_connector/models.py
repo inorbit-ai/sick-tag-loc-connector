@@ -5,12 +5,14 @@
 
 # Standard
 import os
+from typing import Optional, Dict, Any
 from urllib.parse import urlunparse
 
 # Third Party
+from inorbit_edge.robot import RobotFootprintSpec
 from inorbit_connector.models import InorbitConnectorConfig
 from inorbit_connector.utils import read_yaml
-from pydantic import BaseModel, HttpUrl, field_validator
+from pydantic import BaseModel, HttpUrl, field_validator, model_validator
 
 # Accepted/default values
 CONNECTOR_TYPE = "sick_tag_loc"
@@ -29,13 +31,22 @@ class SickTagLocConfigModel(BaseModel):
         sick_rtls_http_server_address (HttpUrl): The URL of the SICK RTLS server
         sick_rtls_rest_api_port (int, optional): The port SICK RTLS REST API
         sick_rtls_websocket_port (int, optional): The port SICK RTLS WebSocket
-        sick_rtls_api_key (str | None, optional): The SICK RTLS API key
+        sick_rtls_api_key (str | None, optional): The SICK RTLS API
+        footprint_specs (Dict[str, Any], optional): footprintId to footprint spec
+            as dictionary.
+        footprint_specs (Dict[str, RobotFootprintSpec], optional): footprintId to
+            RobotFootprintSpec mapping. If not provided, calculated from
+            footprint_specs_raw.
+        tag_footprints (Dict[str, str], optional): tagId to footprintId mapping
     """
 
     sick_rtls_http_server_address: HttpUrl
     sick_rtls_rest_api_port: int = DEFAULT_RTLS_REST_API_PORT
     sick_rtls_websocket_port: int = DEFAULT_RTLS_WS_PORT
     sick_rtls_api_key: str = os.getenv("SICK_RTLS_API_KEY")
+    footprint_specs: Optional[Dict[str, Any]] = {}
+    footprint_specs: Optional[Dict[str, RobotFootprintSpec]] = {}
+    tag_footprints: Optional[Dict[str, str]] = {}
 
     # noinspection PyMethodParameters
     @field_validator("sick_rtls_rest_api_port", "sick_rtls_websocket_port")
@@ -78,6 +89,37 @@ class SickTagLocConfigModel(BaseModel):
         if any(char.isspace() for char in value):
             raise ValueError("Whitespaces are not allowed")
         return value
+
+    @model_validator(mode="before")
+    def check_tag_footprints(cls, data):
+        """Validate that the referenced footprint exists.
+
+        Args:
+            value (Dict[str, str]): The tag_footprints dictionary.
+
+        Returns:
+            Dict[str, str]: The given value if the referenced footprint exists.
+        """
+        footprint_specs = data.get("footprint_specs")
+        tag_footprints = data.get("tag_footprints")
+        
+        if not tag_footprints and not footprint_specs:
+            return data
+
+        if tag_footprints and not footprint_specs:
+            raise ValueError("Footprint specs not set")
+
+        for tag_id, footprint_id in tag_footprints.items():
+            if footprint_id not in footprint_specs:
+                raise ValueError(
+                    f"Footprint '{footprint_id}' not found for tag '{tag_id}'"
+                )
+
+        for k, v in footprint_specs.items():
+            if isinstance(v, dict):
+                data["footprint_specs"][k] = RobotFootprintSpec(**v)
+
+        return data
 
     def get_rest_api_url(self):
         """Returns the REST API URL for the Sick RTLS system.
