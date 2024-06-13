@@ -9,6 +9,7 @@ from typing import Type, TypeVar, Set, Any, Callable
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
 from sick_tag_loc_connector.api.feed import Feed
+from sick_tag_loc_connector.api.feed import ENDPOINT as FEEDS_ENDPOINT
 from sick_tag_loc_connector.api.rest import FeedTypes
 from sick_tag_loc_connector.api.websocket import WebSocketClient
 
@@ -109,7 +110,7 @@ class Tag(Feed):
         Returns:
             An instance of the Tag class, representing the retrieved tag
         """
-        data = rest_client.get(f"/{ENDPOINT}/{tag_id}")
+        data = rest_client.get(f"{ENDPOINT}/{tag_id}")
         return cls(rest_client, **data)
 
     @staticmethod
@@ -126,7 +127,7 @@ class Tag(Feed):
             A set of Tag instances, representing the retrieved tags
         """
         # TODO(elvio.aruta): add pagination to this get call
-        data = rest_client.get(f"/{ENDPOINT}")
+        data = rest_client.get(f"{ENDPOINT}")
         tag_set = {Tag(rest_client, **tag) for tag in data["results"]}
         return tag_set
 
@@ -145,7 +146,7 @@ class Tag(Feed):
         Returns:
             An instance of the Tag class, representing the created tag
         """
-        data = rest_client.post(f"/{ENDPOINT}", tag_data)
+        data = rest_client.post(f"{ENDPOINT}", tag_data)
         return cls(rest_client, **data)
 
 
@@ -189,8 +190,10 @@ class TagStreamWebSocketClient(WebSocketClient):
             The "method" and "resource" in the message should be parameterized. Possible
             values should be part of this class (add new Enums)
         """
+        # NOTE(elvio.aruta): the sub_message points to feeds endpoint because "/tags/" endpoint
+        # doesn't exist for updates subscription
         sub_message = (
             f'{{"headers":{{"X-ApiKey":"{self.api_key}"}}, "method":"subscribe", '
-            f'"resource":"{ENDPOINT}/{self.tag.get_id()}"}}'
+            f'"resource":"/{FEEDS_ENDPOINT}/{self.tag.get_id()}"}}'
         )
         super().send(sub_message)
