@@ -110,7 +110,7 @@ class Tag(Feed):
         Returns:
             An instance of the Tag class, representing the retrieved tag
         """
-        data = rest_client.get(f"{ENDPOINT}/{tag_id}")
+        data = rest_client.get(f"/{ENDPOINT}/{tag_id}")
         return cls(rest_client, **data)
 
     @staticmethod
@@ -127,7 +127,7 @@ class Tag(Feed):
             A set of Tag instances, representing the retrieved tags
         """
         # TODO(elvio.aruta): add pagination to this get call
-        data = rest_client.get(f"{ENDPOINT}")
+        data = rest_client.get(f"/{ENDPOINT}")
         tag_set = {Tag(rest_client, **tag) for tag in data["results"]}
         return tag_set
 
@@ -146,7 +146,7 @@ class Tag(Feed):
         Returns:
             An instance of the Tag class, representing the created tag
         """
-        data = rest_client.post(f"{ENDPOINT}", tag_data)
+        data = rest_client.post(f"/{ENDPOINT}", tag_data)
         return cls(rest_client, **data)
 
 
