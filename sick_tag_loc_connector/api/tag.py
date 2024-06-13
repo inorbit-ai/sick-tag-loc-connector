@@ -192,6 +192,9 @@ class TagStreamWebSocketClient(WebSocketClient):
         """
         # NOTE(elvio.aruta): the sub_message points to feeds endpoint because "/tags/" endpoint
         # doesn't exist for updates subscription
+        # This entire class could be deleted and the implementation could be moved inside the Feed
+        # class, leaving to that class the responsability to create a WebSocketClient and to start
+        # the subscription
         sub_message = (
             f'{{"headers":{{"X-ApiKey":"{self.api_key}"}}, "method":"subscribe", '
             f'"resource":"/{FEEDS_ENDPOINT}/{self.tag.get_id()}"}}'
