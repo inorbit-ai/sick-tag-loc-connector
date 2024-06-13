@@ -6,6 +6,8 @@ log_level: INFO
 connector_type: sick_tag_loc
 # Update rate of the connector's main execution loop in Hz
 update_freq: 5.0
+# Account ID of the InOrbit account where the robots are registered
+account_id: my_inorbit_account
 
 # This is where you define custom fields specific to your robot's connector
 connector_config:

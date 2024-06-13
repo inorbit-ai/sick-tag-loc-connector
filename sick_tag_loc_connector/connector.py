@@ -34,11 +34,17 @@ class SickTagLocConnector(Connector):
             tag (Tag): The SICK tag associated with this connector
             config (SickTagLocConfig): The configuration for this connector
         """
-        super().__init__(tag.get_inorbit_id(), config)
+        tag_id = tag.get_inorbit_id()
+        super().__init__(tag_id, config)
 
         self.config = config
         self.tag = tag
         self.websocket_client = None
+        if config.connector_config.tag_footprints.get(tag_id):
+            self.footprint_id = config.connector_config.tag_footprints.get(tag_id)
+            self.footprint = self.config.connector_config.footprint_specs.get(self.footprint_id)
+            if self.footprint:
+                self._robot_session.apply_footprint(self.footprint)
 
     def _connect(self) -> None:
         """Connect the SICK Tag connector and subscribe to updates.
