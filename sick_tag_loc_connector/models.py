@@ -31,7 +31,7 @@ class SickTagLocConfigModel(BaseModel):
         sick_rtls_http_server_address (HttpUrl): The URL of the SICK RTLS server
         sick_rtls_rest_api_port (int, optional): The port SICK RTLS REST API
         sick_rtls_websocket_port (int, optional): The port SICK RTLS WebSocket
-        sick_rtls_api_key (str | None, optional): The SICK RTLS API
+        sick_rtls_api_key (str | None, optional): The SICK RTLS API key
         footprint_specs (Dict[str, RobotFootprintSpec], optional): List of defined
             footprints for tags. Should include the footprint and radius.
         tag_footprints (Dict[str, str]): Mapping of tag IDs to `RobotFootprintSpec`
