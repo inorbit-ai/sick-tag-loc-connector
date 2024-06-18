@@ -98,10 +98,10 @@ class SickTagLocConfigModel(BaseModel):
             Dict[str, str]: The given value if the referenced footprint exists.
         """
         footprints = data.get("footprints")
-        
+
         if not footprints:
             return data
-        
+
         data["tag_footprints"] = {}
 
         for custom_footprint in footprints:
@@ -110,7 +110,7 @@ class SickTagLocConfigModel(BaseModel):
 
             if not isinstance(custom_footprint.get("tags"), list):
                 raise ValueError("Tags must be a list of tag IDs")
-            
+
             if not isinstance(custom_footprint.get("spec"), dict):
                 raise ValueError("Spec must be a dictionary")
 
@@ -123,7 +123,7 @@ class SickTagLocConfigModel(BaseModel):
             for tag_id in custom_footprint.get("tags"):
                 if not isinstance(tag_id, str):
                     raise ValueError("Tag ID must be a string")
-                
+
                 data["tag_footprints"][tag_id] = RobotFootprintSpec(
                     footprint=footprint,
                     radius=radius,
