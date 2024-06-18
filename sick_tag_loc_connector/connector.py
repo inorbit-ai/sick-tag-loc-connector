@@ -43,11 +43,10 @@ class SickTagLocConnector(Connector):
         self._last_pose = None
         self._last_pose_sent = None
 
-        if config.connector_config.tag_footprints.get(tag_id):
-            self.footprint_id = config.connector_config.tag_footprints.get(tag_id)
-            self.footprint = self.config.connector_config.footprint_specs.get(self.footprint_id)
-            if self.footprint:
-                self._robot_session.apply_footprint(self.footprint)
+        # If a footprint spec was provided, apply it
+        if footprint := config.connector_config.tag_footprints.get(tag_id):
+            self._logger.debug(f"Applying footprint {footprint} to tag {tag_id}")
+            self._robot_session.apply_footprint(footprint)
 
     def _connect(self) -> None:
         """Connect the SICK Tag connector and subscribe to updates.

@@ -5,7 +5,7 @@
 
 # Standard
 import os
-from typing import Optional, Dict, Any
+from typing import Optional, List, Dict, Any
 from urllib.parse import urlunparse
 
 # Third Party
@@ -32,21 +32,18 @@ class SickTagLocConfigModel(BaseModel):
         sick_rtls_rest_api_port (int, optional): The port SICK RTLS REST API
         sick_rtls_websocket_port (int, optional): The port SICK RTLS WebSocket
         sick_rtls_api_key (str | None, optional): The SICK RTLS API
-        footprint_specs (Dict[str, Any], optional): footprintId to footprint spec
-            as dictionary.
-        footprint_specs (Dict[str, RobotFootprintSpec], optional): footprintId to
-            RobotFootprintSpec mapping. If not provided, calculated from
-            footprint_specs_raw.
-        tag_footprints (Dict[str, str], optional): tagId to footprintId mapping
+        footprint_specs (Dict[str, RobotFootprintSpec], optional): List of defined
+            footprints for tags. Should include the footprint and radius.
+        tag_footprints (Dict[str, str]): Mapping of tag IDs to `RobotFootprintSpec`
+            created after parsing the `footprint_specs` attribute.
     """
 
     sick_rtls_http_server_address: HttpUrl
     sick_rtls_rest_api_port: int = DEFAULT_RTLS_REST_API_PORT
     sick_rtls_websocket_port: int = DEFAULT_RTLS_WS_PORT
     sick_rtls_api_key: str = os.getenv("SICK_RTLS_API_KEY")
-    footprint_specs: Optional[Dict[str, Any]] = {}
-    footprint_specs: Optional[Dict[str, RobotFootprintSpec]] = {}
-    tag_footprints: Optional[Dict[str, str]] = {}
+    footprints: Optional[List[Dict[str, Any]]] = {}
+    tag_footprints: Dict[str, RobotFootprintSpec] = {}
 
     # noinspection PyMethodParameters
     @field_validator("sick_rtls_rest_api_port", "sick_rtls_websocket_port")
@@ -100,24 +97,37 @@ class SickTagLocConfigModel(BaseModel):
         Returns:
             Dict[str, str]: The given value if the referenced footprint exists.
         """
-        footprint_specs = data.get("footprint_specs")
-        tag_footprints = data.get("tag_footprints")
+        footprints = data.get("footprints")
         
-        if not tag_footprints and not footprint_specs:
+        if not footprints:
             return data
+        
+        data["tag_footprints"] = {}
 
-        if tag_footprints and not footprint_specs:
-            raise ValueError("Footprint specs not set")
+        for custom_footprint in footprints:
+            if not isinstance(custom_footprint, dict):
+                raise ValueError("Footprint must be a dictionary")
 
-        for tag_id, footprint_id in tag_footprints.items():
-            if footprint_id not in footprint_specs:
-                raise ValueError(
-                    f"Footprint '{footprint_id}' not found for tag '{tag_id}'"
+            if not isinstance(custom_footprint.get("tags"), list):
+                raise ValueError("Tags must be a list of tag IDs")
+            
+            if not isinstance(custom_footprint.get("spec"), dict):
+                raise ValueError("Spec must be a dictionary")
+
+            footprint = custom_footprint["spec"].get("footprint")
+            radius = custom_footprint["spec"].get("radius")
+
+            if not footprint and not radius:
+                raise ValueError("At least one of footprint or radius must be provided")
+
+            for tag_id in custom_footprint.get("tags"):
+                if not isinstance(tag_id, str):
+                    raise ValueError("Tag ID must be a string")
+                
+                data["tag_footprints"][tag_id] = RobotFootprintSpec(
+                    footprint=footprint,
+                    radius=radius,
                 )
-
-        for k, v in footprint_specs.items():
-            if isinstance(v, dict):
-                data["footprint_specs"][k] = RobotFootprintSpec(**v)
 
         return data
 
