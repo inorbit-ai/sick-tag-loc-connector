@@ -7,13 +7,14 @@ connector_type: sick_tag_loc
 # Update rate of the connector's main execution loop in Hz
 update_freq: 5.0
 # Account ID of the InOrbit account where the robots are registered
-account_id: my_inorbit_account
+account_id: <inorbit_account_id>
 
 # This is where you define custom fields specific to your robot's connector
 connector_config:
   sick_rtls_http_server_address: http://192.168.1.249/
   sick_rtls_rest_api_port: 8080
   sick_rtls_websocket_port: 8080
+  sick_rtls_api_key: <sick_api_key>
   # Custom footprint specs
   footprint_specs:
     pallet:
