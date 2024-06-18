@@ -36,6 +36,7 @@ class WebSocketClient:
         self.on_message_callback = on_message_callback
         self.ws = None
         self.thread = None
+        self.connection_open = threading.Event()
 
     def on_error(self, error: str) -> None:
         """
@@ -56,12 +57,14 @@ class WebSocketClient:
             msg (str): The disconnect message
         """
         self.logger.info(f"Connection closed for {self.url} -> {code}:'{msg}'")
+        self.connection_open.clear()
 
     def on_open(self) -> None:
         """
         Callback function to handle the opening of the WebSocket connection.
         """
         self.logger.info(f"Connection opened for {self.url}")
+        self.connection_open.set()
 
     def on_message(self, msg: str) -> None:
         """
@@ -82,10 +85,12 @@ class WebSocketClient:
         Args:
             data (bytes | str): The data to send.
         """
-        if self.ws:
+        if self.ws and self.connection_open.is_set():
             self.ws.send(data)
         else:
-            self.logger.warning("WebSocketApp not initialized, data will not be sent.")
+            self.logger.warning(
+                "WebSocketApp not initialized, or connection not open, data will not be sent."
+            )
 
     def connect(self) -> None:
         """
@@ -100,6 +105,8 @@ class WebSocketClient:
         )
         self.thread = threading.Thread(target=self.ws.run_forever)
         self.thread.start()
+        # Wait until connection is open
+        self.connection_open.wait()
 
     def close(self) -> None:
         """

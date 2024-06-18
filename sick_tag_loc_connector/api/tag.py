@@ -9,6 +9,7 @@ from typing import Type, TypeVar, Set, Any, Callable
 # InOrbit
 from sick_tag_loc_connector.api import RestClient
 from sick_tag_loc_connector.api.feed import Feed
+from sick_tag_loc_connector.api.feed import ENDPOINT as FEEDS_ENDPOINT
 from sick_tag_loc_connector.api.rest import FeedTypes
 from sick_tag_loc_connector.api.websocket import WebSocketClient
 
@@ -189,8 +190,13 @@ class TagStreamWebSocketClient(WebSocketClient):
             The "method" and "resource" in the message should be parameterized. Possible
             values should be part of this class (add new Enums)
         """
+        # NOTE(elvio.aruta): the sub_message points to feeds endpoint because "/tags/" endpoint
+        # doesn't exist for updates subscription
+        # This entire class could be deleted and the implementation could be moved inside the Feed
+        # class, leaving to that class the responsability of creating a WebSocketClient and
+        # starting the subscription to the updates
         sub_message = (
             f'{{"headers":{{"X-ApiKey":"{self.api_key}"}}, "method":"subscribe", '
-            f'"resource":"{ENDPOINT}/{self.tag.get_id()}"}}'
+            f'"resource":"/{FEEDS_ENDPOINT}/{self.tag.get_id()}"}}'
         )
         super().send(sub_message)

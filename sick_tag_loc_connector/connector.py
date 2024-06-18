@@ -40,11 +40,8 @@ class SickTagLocConnector(Connector):
         self.config = config
         self.tag = tag
         self.websocket_client = None
-        if config.connector_config.tag_footprints.get(tag_id):
-            self.footprint_id = config.connector_config.tag_footprints.get(tag_id)
-            self.footprint = self.config.connector_config.footprint_specs.get(self.footprint_id)
-            if self.footprint:
-                self._robot_session.apply_footprint(self.footprint)
+        self._last_pose = None
+        self._last_pose_sent = None
 
     def _connect(self) -> None:
         """Connect the SICK Tag connector and subscribe to updates.
@@ -75,12 +72,17 @@ class SickTagLocConnector(Connector):
         if self.websocket_client:
             self.websocket_client.close()
             self.websocket_client = None
+            self._last_pose = None
+            self._last_pose_sent = None
 
     def _execution_loop(self):
-        # TODO(russell): Instead, store the latest pose from the WS callback and publish
-        #                it here. This makes sures the publish happens at the correct
-        #                rate as defined in the controller config.
-        print("WARNING: The cake is a lie!")
+        """Send updated poses.
+
+        This will only publish on a change in position.
+        """
+        if self._last_pose != self._last_pose_sent:
+            self._robot_session.publish_pose(**self._last_pose)
+            self._last_pose_sent = self._last_pose
 
     @staticmethod
     def _parse_pose_from_ws(msg_from_ws: Union[bytes, str]) -> dict:
@@ -98,9 +100,10 @@ class SickTagLocConnector(Connector):
         pose_data = {}
         for datastream in datastreams:
             if (ds_id := datastream["id"]) == "posX":
-                pose_data["x"] = datastream["current_value"].strip()
+                pose_data["x"] = float(datastream["current_value"].strip())
             elif ds_id == "posY":
-                pose_data["y"] = datastream["current_value"].strip()
+                pose_data["y"] = float(datastream["current_value"].strip())
+        pose_data["yaw"] = float("-inf")
         return pose_data
 
     def _publish_poses_on_inorbit(self, msg: Any) -> None:
@@ -112,7 +115,7 @@ class SickTagLocConnector(Connector):
         """
         pose = self._parse_pose_from_ws(msg)
         pose = self._apply_poses_transformation(pose)
-        self._robot_session.publish_pose(**pose)
+        self._last_pose = pose
 
     @staticmethod
     def _apply_poses_transformation(pose) -> dict:
