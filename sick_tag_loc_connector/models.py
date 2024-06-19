@@ -12,11 +12,13 @@ from inorbit_connector.models import InorbitConnectorConfig
 from inorbit_connector.utils import read_yaml
 from pydantic import BaseModel, HttpUrl, field_validator
 
+# InOrbit
+from sick_tag_loc_connector.api import REST_ENDPOINT
+
 # Accepted/default values
 CONNECTOR_TYPE = "sick_tag_loc"
 DEFAULT_RTLS_REST_API_PORT = 8080
 DEFAULT_RTLS_WS_PORT = 80
-SICK_RTLS_REST_ENDPOINT = "/sensmapserver/api"
 
 
 class SickTagLocConfigModel(BaseModel):
@@ -91,7 +93,7 @@ class SickTagLocConfigModel(BaseModel):
         netloc = (
             f"{self.sick_rtls_http_server_address.host}:{self.sick_rtls_rest_api_port}"
         )
-        url = SICK_RTLS_REST_ENDPOINT
+        url = REST_ENDPOINT
 
         components = (scheme, netloc, url, "", "", "")
         return urlunparse(components)

@@ -10,8 +10,9 @@ from typing import Union, Any
 # Third-party
 from inorbit_connector.connector import Connector
 
+# InOrbit
 from sick_tag_loc_connector.models import SickTagLocConfig
-from sick_tag_loc_connector.api.tag import Tag, TagStreamWebSocketClient
+from sick_tag_loc_connector.api.tag import Tag
 
 
 class SickTagLocConnector(Connector):
@@ -23,7 +24,7 @@ class SickTagLocConnector(Connector):
     Attributes:
         config (SickTagLocConfig): The configuration for this connector
         tag (Tag): The SICK tag associated with this connector
-        websocket_client (TagStreamWebSocketClient | None): The Tag Websocket connection
+        websocket_client (TagStreamWebSocketClient | None): The Tag WebSocket connection
     """
 
     def __init__(self, config: SickTagLocConfig, tag: Tag) -> None:
@@ -49,17 +50,11 @@ class SickTagLocConnector(Connector):
         """
         super()._connect()
 
-        # TODO(russell): Change to self.tag.create_websocket_client()
-        self.websocket_client = TagStreamWebSocketClient(
-            self.config.connector_config.get_websocket_url(),
-            self.config.connector_config.sick_rtls_api_key,
-            self._publish_poses_on_inorbit,
-            self.tag,
+        self.websocket_client = self.tag.get_websocket_client(
+            self.config.connector_config.sick_rtls_websocket_port,
+            self._parse_pose_from_ws,
         )
-
-        self.websocket_client.connect()
-        # TODO(russell/elvio): Might be better to just have this called in connect
-        self.websocket_client.subscribe_to_tag_updates()
+        self.websocket_client.subscribe()
 
     def _disconnect(self) -> None:
         """Disconnect the SICK Tag connector and unsubscribe from updates.
@@ -83,16 +78,13 @@ class SickTagLocConnector(Connector):
             self._robot_session.publish_pose(**self._last_pose)
             self._last_pose_sent = self._last_pose
 
-    @staticmethod
-    def _parse_pose_from_ws(msg_from_ws: Union[bytes, str]) -> dict:
-        """
-        Parse the pose data from the WebSocket message.
+    def _parse_pose_from_ws(self, msg_from_ws: Union[bytes, str]) -> None:
+        """Parse the pose data from the WebSocket message.
+
+        If a valid pose message is found, self._last_pose is set.
 
         Args:
-            msg_from_ws (Any): The message received from the WebSocket.
-
-        Returns:
-            dict: The parsed pose data containing 'x' and 'y' coordinates.
+            msg_from_ws (bytes | str): The message received from the WebSocket.
         """
         parsed_json = json.loads(msg_from_ws)
         datastreams = parsed_json["body"]["datastreams"]
@@ -102,8 +94,9 @@ class SickTagLocConnector(Connector):
                 pose_data["x"] = float(datastream["current_value"].strip())
             elif ds_id == "posY":
                 pose_data["y"] = float(datastream["current_value"].strip())
-        pose_data["yaw"] = float("-inf")
-        return pose_data
+        if "x" in pose_data and "y" in pose_data:
+            pose_data["yaw"] = float("inf")
+            self._last_pose = pose_data
 
     def _publish_poses_on_inorbit(self, msg: Any) -> None:
         """

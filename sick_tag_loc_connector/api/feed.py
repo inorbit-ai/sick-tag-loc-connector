@@ -4,13 +4,16 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any
+from typing import Type, TypeVar, Set, Any, Callable
+from urllib.parse import urlparse
 
 # InOrbit
-from sick_tag_loc_connector.api import RestClient
-
-# The endpoint name for feeds
-ENDPOINT: str = "feeds"
+from sick_tag_loc_connector.api import (
+    RestClient,
+    WebSocketClient,
+    ENDPOINT_FEEDS,
+    HEADER_API_KEY,
+)
 
 T: TypeVar = TypeVar("T", bound="Feed")
 
@@ -48,7 +51,7 @@ class Feed:
     def __init__(
         self,
         rest_client: RestClient,
-        endpoint: str = ENDPOINT,
+        endpoint: str = ENDPOINT_FEEDS,
         alias: str | None = None,
         title: str | None = None,
         private: str = "0",
@@ -121,7 +124,7 @@ class Feed:
         Returns:
             An instance of the Feed class, representing the retrieved feed
         """
-        data = rest_client.get(f"/{ENDPOINT}/{feed_id}")
+        data = rest_client.get(f"/{ENDPOINT_FEEDS}/{feed_id}")
         return cls(rest_client, **data)
 
     @staticmethod
@@ -138,7 +141,7 @@ class Feed:
             A set of Feed instances, representing the retrieved feeds
         """
         # TODO(elvio.aruta): add pagination to this get call
-        data = rest_client.get(ENDPOINT)
+        data = rest_client.get(ENDPOINT_FEEDS)
         feed_set = {Feed(rest_client, **feed) for feed in data["results"]}
         return feed_set
 
@@ -157,7 +160,7 @@ class Feed:
         Returns:
             An instance of the Feed class, representing the created feed
         """
-        data = rest_client.post(f"/{ENDPOINT}", data)
+        data = rest_client.post(f"/{ENDPOINT_FEEDS}", data)
         return cls(rest_client, **data)
 
     def update(self) -> None:
@@ -258,5 +261,34 @@ class Feed:
         Returns:
             str: The assigned InOrbit ID.
         """
-        # TODO(elvio/russell): title seems to be a unique address, this *should* be safe
         return f"{SICK_RTLS_ID_PREFIX}-{self._type}_{self._id}_{self.title}"
+
+    def get_websocket_client(self, port: int, callback: Callable) -> WebSocketClient:
+        """Constructs and returns a WebSocketClient object.
+
+        This will create a connection based on the feed ID.
+
+        Args:
+            port (int): The port to connect to for the WebSocket connection
+            callback (Callable): The callback function to call whenever a message is
+                                 received from the WebSocket connection; The callback
+                                 function should accept a single argument, which is the
+                                 received message.
+
+        Returns:
+            WebSocketClient: The initialized WebSocketClient object.
+        """
+        # Construct the WebSocket URL based on what we know
+        components = urlparse(self.rest_client.url)
+        # Allows for HTTP(S) and WS(S) automatically
+        scheme = components.scheme.replace("http", "ws")
+        netloc = (
+            components.netloc[: components.netloc.rfind(":")]
+            if ":" in components.netloc
+            else components.netloc
+        )
+        url = f"{scheme}://{netloc}:{port}"
+
+        return WebSocketClient(
+            url, self.rest_client.headers[HEADER_API_KEY], self.get_id(), callback
+        )
