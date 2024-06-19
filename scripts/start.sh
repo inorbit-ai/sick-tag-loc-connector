@@ -11,10 +11,10 @@ VENV_DIR=.venv
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <config_basename> [<args>]"
-    echo "Example: \`$0 local -v\` runs the connector with the 'config/local.yaml' configuration and the flag '-v'"
+    echo "Example: \`$0 local -v\` runs the Connector with the 'config/local.yaml' configuration and the flag '-v'"
     echo ""
-    echo "  The script will start the InOrbit SICK Tag-LOC RTLS Connector with the specified YAML configuration from the config directory. Extra arguments will be passed to the connector."
-    echo "  The connector will be run in a virtual environment located in the '`realpath $VENV_DIR`' directory."
+    echo "  The script will start the InOrbit SICK Tag-LOC RTLS Connector with the specified YAML configuration from the config directory. Extra arguments will be passed to the Connector."
+    echo "  The Connector will be run in a virtual environment located in the '`realpath $VENV_DIR`' directory."
     echo "  If '`realpath $ENV_FILE`' exists, its variables will be exported. It is a good place to set environment variables like \`INORBIT_API_KEY\`."
     echo "  Available configurations:"
     ls config/*.yaml | xargs -n 1 basename | sed 's/\.yaml//'
