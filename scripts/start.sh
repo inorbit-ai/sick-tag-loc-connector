@@ -6,7 +6,6 @@ SCRIPT_DIR=`dirname $SCRIPT_PATH`
 # Change to the connector directory
 cd $SCRIPT_DIR/..
 
-
 ENV_FILE=config/.env
 VENV_DIR=.venv
 
@@ -35,13 +34,16 @@ if [ ! -f $VENV_DIR/bin/activate ]; then
     echo "Virtual environment not found."
     exit 1
 fi
+
 if [ ! -f $ENV_FILE ]; then
     echo "Warning: Environment file $ENV_FILE not found"
+else
+    echo "Exporting variables from $ENV_FILE"
+    # Get all environment variables from the .env file and export them
+    export $(grep -v '^#' $ENV_FILE | xargs)
 fi
 
 # Activate the virtual environment
 source $VENV_DIR/bin/activate
-# Get all environment variables from the .env file and export them
-export $(grep -v '^#' $ENV_FILE | xargs)
 # Start the connector
 sick-tag-loc-connector -c $CONFIG_FILE $CONNECTOR_ARGS
