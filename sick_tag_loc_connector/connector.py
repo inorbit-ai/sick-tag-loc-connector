@@ -48,7 +48,7 @@ class SickTagLocConnector(Connector):
         This method also calls the super method to connect to InOrbit, and applies the
         footprint settings if provided.
         """
-        # Connecto to InOrbit
+        # Connect to InOrbit
         super()._connect()
 
         # TODO(russell): Change to self.tag.create_websocket_client()
