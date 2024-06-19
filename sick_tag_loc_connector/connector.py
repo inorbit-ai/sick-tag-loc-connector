@@ -45,8 +45,10 @@ class SickTagLocConnector(Connector):
     def _connect(self) -> None:
         """Connect the SICK Tag connector and subscribe to updates.
 
-        This method also calls the super method to connect to InOrbit.
+        This method also calls the super method to connect to InOrbit, and applies the
+        footprint settings if provided.
         """
+        # Connect to InOrbit
         super()._connect()
 
         # TODO(russell): Change to self.tag.create_websocket_client()
@@ -60,6 +62,12 @@ class SickTagLocConnector(Connector):
         self.websocket_client.connect()
         # TODO(russell/elvio): Might be better to just have this called in connect
         self.websocket_client.subscribe_to_tag_updates()
+
+        # If a footprint spec was provided, apply it
+        tag_id = self.tag.get_inorbit_id()
+        if footprint := self.config.connector_config.tag_footprints.get(tag_id):
+            self._logger.debug(f"Applying footprint {footprint} to tag {tag_id}")
+            self._robot_session.apply_footprint(footprint)
 
     def _disconnect(self) -> None:
         """Disconnect the SICK Tag connector and unsubscribe from updates.

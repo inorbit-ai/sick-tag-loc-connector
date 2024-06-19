@@ -114,6 +114,87 @@ class TestSickTagLocConfigModel:
         )
         assert model.get_websocket_url() == "ws://localhost:9000"
 
+    def test_tag_footprints_validation(self):
+        model = sick_tag_loc_connector.models.SickTagLocConfigModel(
+            sick_rtls_http_server_address="https://localhost/",
+            footprints=[
+                {
+                    "tags": ["tagId1", "tagId7"],
+                    "spec": {
+                        "footprint": [
+                            {"x": -0.5, "y": -0.5},
+                            {"x": 0.3, "y": -0.5},
+                            {"x": 0.3, "y": 0.5},
+                            {"x": -0.5, "y": 0.5},
+                        ],
+                        "radius": 1,
+                    },
+                },
+                {"tags": ["tagId3"], "spec": {"radius": 0.2}},
+            ],
+        )
+        assert model.tag_footprints["tagId1"].footprint == [
+            {"x": -0.5, "y": -0.5},
+            {"x": 0.3, "y": -0.5},
+            {"x": 0.3, "y": 0.5},
+            {"x": -0.5, "y": 0.5},
+        ]
+        assert model.tag_footprints["tagId1"].radius == 1
+        assert model.tag_footprints["tagId3"].radius == 0.2
+
+        with pytest.raises(
+            ValueError, match="At least one of footprint or radius must be provided"
+        ):
+            sick_tag_loc_connector.models.SickTagLocConfigModel(
+                sick_rtls_http_server_address="https://localhost/",
+                footprints=[
+                    {
+                        "tags": ["tagId1", "tagId7"],
+                        "spec": {},
+                    },
+                ],
+            )
+        with pytest.raises(
+            ValueError, match="At least one of footprint or radius must be provided"
+        ):
+            sick_tag_loc_connector.models.SickTagLocConfigModel(
+                sick_rtls_http_server_address="https://localhost/",
+                footprints=[
+                    {
+                        "tags": ["tagId1", "tagId7"],
+                        "spec": {},
+                    },
+                ],
+            )
+        with pytest.raises(ValueError, match="Spec must be a dictionary"):
+            sick_tag_loc_connector.models.SickTagLocConfigModel(
+                sick_rtls_http_server_address="https://localhost/",
+                footprints=[
+                    {
+                        "tags": ["tagId1", "tagId7"],
+                        "spec": "invalid",
+                    },
+                ],
+            )
+        with pytest.raises(ValueError, match="Tags must be a list"):
+            sick_tag_loc_connector.models.SickTagLocConfigModel(
+                sick_rtls_http_server_address="https://localhost/",
+                footprints=[
+                    {
+                        "tags": "invalid",
+                        "spec": {
+                            "footprint": [
+                                {"x": -0.5, "y": -0.5},
+                                {"x": 0.3, "y": -0.5},
+                                {"x": 0.3, "y": 0.5},
+                                {"x": -0.5, "y": 0.5},
+                            ],
+                            "radius": 1,
+                        },
+                    },
+                ],
+            )
+
 
 class TestSickTagLocConfig:
 
