@@ -4,17 +4,13 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from typing import Type, TypeVar, Set, Any, Callable
+from typing import Type, TypeVar, Set, Any
 
 # InOrbit
-from sick_tag_loc_connector.api import RestClient
+from sick_tag_loc_connector.api import RestClient, ENDPOINT_TAGS
 from sick_tag_loc_connector.api.feed import Feed
-from sick_tag_loc_connector.api.feed import ENDPOINT as FEEDS_ENDPOINT
 from sick_tag_loc_connector.api.rest import FeedTypes
-from sick_tag_loc_connector.api.websocket import WebSocketClient
 
-# The endpoint name for tags
-ENDPOINT: str = "tags"
 # Type hint definition
 T: TypeVar = TypeVar("T", bound="Tag")
 
@@ -83,7 +79,7 @@ class Tag(Feed):
         """
         super().__init__(
             rest_client=rest_client,
-            endpoint=ENDPOINT,
+            endpoint=ENDPOINT_TAGS,
             alias=alias,
             private=private,
             description=description,
@@ -110,7 +106,7 @@ class Tag(Feed):
         Returns:
             An instance of the Tag class, representing the retrieved tag
         """
-        data = rest_client.get(f"/{ENDPOINT}/{tag_id}")
+        data = rest_client.get(f"/{ENDPOINT_TAGS}/{tag_id}")
         return cls(rest_client, **data)
 
     @staticmethod
@@ -127,7 +123,7 @@ class Tag(Feed):
             A set of Tag instances, representing the retrieved tags
         """
         # TODO(elvio.aruta): add pagination to this get call
-        data = rest_client.get(f"/{ENDPOINT}")
+        data = rest_client.get(f"/{ENDPOINT_TAGS}")
         tag_set = {Tag(rest_client, **tag) for tag in data["results"]}
         return tag_set
 
@@ -146,57 +142,5 @@ class Tag(Feed):
         Returns:
             An instance of the Tag class, representing the created tag
         """
-        data = rest_client.post(f"/{ENDPOINT}", tag_data)
+        data = rest_client.post(f"/{ENDPOINT_TAGS}", tag_data)
         return cls(rest_client, **data)
-
-
-class TagStreamWebSocketClient(WebSocketClient):
-    """
-    A WebSocket client specifically for subscribing to tag updates.
-
-    Inherits from WebSocketClient and adds functionality to handle tag-specific
-    subscriptions.
-    """
-
-    def __init__(self, url: str, api_key: str, on_message_callback: Callable, tag: Tag):
-        """
-        Initialize the TagStreamWebSocketClient.
-
-        Args:
-            url (str): The URL for the WebSocket connection.
-            api_key (str): The API key for authentication.
-            on_message_callback (Callable): The callback function to handle incoming
-            messages.
-            tag (Tag): The Tag instance to subscribe to updates for.
-
-        NOTE(elvio.aruta):
-            If the API key is the same for both REST and WebSocket clients, consider
-            reading the key directly from the tag instance.
-            If that's the case, refactor the Tag class to add subscribe(callback) method
-            and make it return a TagStreamWebSocketClient() already subscribed to the
-            updates.
-        """
-        super().__init__(url, api_key, on_message_callback)
-        self.tag = tag
-
-    def subscribe_to_tag_updates(self) -> None:
-        """
-        Subscribe to updates for the specific tag associated with this client.
-
-        This method constructs a subscription message and sends it via the WebSocket
-        connection.
-
-        NOTE(elvio.aruta):
-            The "method" and "resource" in the message should be parameterized. Possible
-            values should be part of this class (add new Enums)
-        """
-        # NOTE(elvio.aruta): the sub_message points to feeds endpoint because "/tags/" endpoint
-        # doesn't exist for updates subscription
-        # This entire class could be deleted and the implementation could be moved inside the Feed
-        # class, leaving to that class the responsability of creating a WebSocketClient and
-        # starting the subscription to the updates
-        sub_message = (
-            f'{{"headers":{{"X-ApiKey":"{self.api_key}"}}, "method":"subscribe", '
-            f'"resource":"/{FEEDS_ENDPOINT}/{self.tag.get_id()}"}}'
-        )
-        super().send(sub_message)
