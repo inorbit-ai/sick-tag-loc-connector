@@ -5,7 +5,7 @@
 
 # Standard
 import json
-from typing import Union, Any
+from typing import Union
 
 # Third-party
 from inorbit_connector.connector import Connector
@@ -104,23 +104,24 @@ class SickTagLocConnector(Connector):
                 pose_data["y"] = float(datastream["current_value"].strip())
         if "x" in pose_data and "y" in pose_data:
             pose_data["yaw"] = float("inf")
-            self._last_pose = pose_data
+            self._last_pose = self._transform(pose_data)
 
-    def _publish_poses_on_inorbit(self, msg: Any) -> None:
-        """
-        Publish pose data on InOrbit.
+    def _transform(self, pose: dict) -> dict:
+        """Main transform between the SICK pose into an InOrbit pose.
+
+        This method will read values from the config. Note that no rotation applied
+        since the SICK system doesn't provide theta and is assumed to be aligned with
+        zero radians.
 
         Args:
-            msg (Any): The message received from the WebSocket.
-        """
-        pose = self._parse_pose_from_ws(msg)
-        pose = self._apply_poses_transformation(pose)
-        self._last_pose = pose
+            pose (dict): A dict with x,y values
 
-    @staticmethod
-    def _apply_poses_transformation(pose) -> dict:
-        # TODO(elvio.aruta): complete this method
-        # Method to transform (x,y) poses from RTLS system
-        # to the correct (x,y) poses displayed in InOrbit
-        # TODO: (elvio.aruta): Create a data structure for pose
-        return pose
+        Returns:
+            A fully transformed pose
+        """
+        # Translation
+        x = pose["x"] - self.config.connector_config.translation_x
+        # Note that the "y" coordinates are reversed in the SICK system
+        y = -pose["y"] - self.config.connector_config.translation_y
+
+        return {"x": x, "y": y, "yaw": pose["yaw"]}

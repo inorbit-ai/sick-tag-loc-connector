@@ -14,6 +14,8 @@ connector_config:
   sick_rtls_http_server_address: http://192.168.1.249/
   sick_rtls_rest_api_port: 8080
   sick_rtls_websocket_port: 8080
+  translation_x: 23.24
+  translation_y: 6.02
   # Custom footprints
   footprints:
     - tags: [tagId1, tagId7]
