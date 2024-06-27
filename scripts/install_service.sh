@@ -56,9 +56,9 @@ if [ "$1" == "--uninstall" ]; then
     exit 0
 fi
 
-echo Note: The user in the \`User=\` field in $( realpath $TEMPLATE ) will be the user to run the service.
-echo "If such user doesn't exist it can be created with \`sudo useradd <username>\`"
-echo If you wish to run the service as a different user, edit the User= field in $( realpath $TEMPLATE ) before continuing.
+echo Note: The user in the \`User=\` field in $( realpath $TEMPLATE ) defines the user that will run the Connector.
+echo "If such user doesn't exist it can be created with \`useradd <username>\`"
+echo If you wish to run the service as a different user, edit the \`User=\` field in $( realpath $TEMPLATE ) before continuing.
 read -n 1 -s -r -p "Press any key to continue"
 echo ""
 echo ""
