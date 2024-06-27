@@ -31,9 +31,6 @@ case "$ans" in
 esac
 echo ""
 
-NAME=$1
-TEMPLATE=`realpath scripts/sick-tag-loc-connector@.service`
-SYSTEMD_SERVICE_NAME="sick-tag-loc-connector@$1.service"
 START_SCRIPT_LOCATION=`realpath scripts/start.sh`
 DESTINATION_START_SCRIPT="/usr/local/bin/sick-tag-loc-connector.sh"
 
@@ -44,17 +41,22 @@ if [ "$1" == "--uninstall" ]; then
         echo Missing service name
         exit 1
     fi
+    SYSTEMD_SERVICE_NAME="sick-tag-loc-connector@$2.service"
 
-    echo Uninstalling systemd service sick-tag-loc-connector@$2.service
-    sudo systemctl stop sick-tag-loc-connector@$2.service
-    sudo systemctl disable sick-tag-loc-connector@$2.service
-    sudo rm /etc/systemd/system/sick-tag-loc-connector@$2.service
+    echo Uninstalling systemd service $SYSTEMD_SERVICE_NAME
+    sudo systemctl stop $SYSTEMD_SERVICE_NAME
+    sudo systemctl disable $SYSTEMD_SERVICE_NAME
+    sudo rm /etc/systemd/system/$SYSTEMD_SERVICE_NAME
     sudo systemctl daemon-reload
 
     echo Removing $DESTINATION_START_SCRIPT
     sudo rm $DESTINATION_START_SCRIPT
     exit 0
 fi
+
+NAME=$1
+TEMPLATE=`realpath scripts/sick-tag-loc-connector@.service`
+SYSTEMD_SERVICE_NAME="sick-tag-loc-connector@$1.service"
 
 echo Note: The user in the \`User=\` field in $TEMPLATE defines the user that will run the Connector.
 echo "If such user doesn't exist it can be created with \`useradd <username>\`"
