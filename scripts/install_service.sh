@@ -2,12 +2,20 @@
 
 # Installs a systemd service for the sick-tag-loc-connector
 
+# Get script directory
+SCRIPT_PATH=`readlink -f $0`
+SCRIPT_DIR=`dirname $SCRIPT_PATH`
+# Change to the connector directory
+cd $SCRIPT_DIR/..
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 [--uninstall] <config_basename>"
-    echo "It will create and enable /etc/systemd/system/sick-tag-loc-connector@<config_basename>.service"
+    echo "This script will create and enable /etc/systemd/system/sick-tag-loc-connector@<config_basename>.service"
     echo "The service will run the InOrbit SICK Tag-LOC Connector with the <config_basename>.yaml configuration"
     echo "If --uninstall is passed it will stop and remove the service"
+    echo ""
+    echo "  Available configurations:"
+    ls config/*.yaml | xargs -n 1 basename | sed 's/\.yaml//'
     exit 1
 fi
 
@@ -24,9 +32,9 @@ esac
 echo ""
 
 NAME=$1
-TEMPLATE="$( realpath $( dirname $0 ) )/sick-tag-loc-connector@.service"
+TEMPLATE="scripts/sick-tag-loc-connector@.service"
 SYSTEMD_SERVICE_NAME="sick-tag-loc-connector@$1.service"
-START_SCRIPT_LOCATION="$( realpath $( dirname $0 ) )/start.sh"
+START_SCRIPT_LOCATION="scripts/start.sh"
 DESTINATION_START_SCRIPT="/usr/local/bin/sick-tag-loc-connector.sh"
 
 # Uninstall procedure
@@ -48,9 +56,9 @@ if [ "$1" == "--uninstall" ]; then
     exit 0
 fi
 
-echo Note: The user in the \`User=\` field in $( relpath $TEMPLATE ) will be the user to run the service.
-echo "If the such user doesn't exist it can be created with \`sudo useradd <username>\`"
-echo If you wish to run the service as a different user, edit the User= field in $( relpath $TEMPLATE ) before continuing.
+echo Note: The user in the \`User=\` field in $( realpath $TEMPLATE ) will be the user to run the service.
+echo "If such user doesn't exist it can be created with \`sudo useradd <username>\`"
+echo If you wish to run the service as a different user, edit the User= field in $( realpath $TEMPLATE ) before continuing.
 read -n 1 -s -r -p "Press any key to continue"
 echo ""
 echo ""
