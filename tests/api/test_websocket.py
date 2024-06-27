@@ -92,8 +92,8 @@ class TestWebSocketClient:
         assert ws_client.connected() is True
         ws_client.subscribe()
         ws_client.ws.send.assert_called_once_with(
-            '{"headers":{"X-ApiKey":"key"},'
-            '"method":"subscribe",'
+            '{"headers":{"X-ApiKey":"key"}, '
+            '"method":"subscribe", '
             '"resource":"/feeds/my_feed_id"}'
         )
 
@@ -103,8 +103,8 @@ class TestWebSocketClient:
         ws_client.ws = mock_websocket
         ws_client.subscribe()
         ws_client.ws.send.assert_called_once_with(
-            '{"headers":{"X-ApiKey":"key"},'
-            '"method":"subscribe",'
+            '{"headers":{"X-ApiKey":"key"}, '
+            '"method":"subscribe", '
             '"resource":"/feeds/my_feed_id"}'
         )
         assert ws_client.connected() is True

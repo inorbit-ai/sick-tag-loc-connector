@@ -91,14 +91,8 @@ class SickTagLocConfigModel(BaseModel):
 
     @model_validator(mode="before")
     def check_tag_footprints(cls, data):
-        """Validate that the referenced footprint exists.
+        """Validate the defined footprints and create the tag_footprints mapping."""
 
-        Args:
-            value (Dict[str, str]): The tag_footprints dictionary.
-
-        Returns:
-            Dict[str, str]: The given value if the referenced footprint exists.
-        """
         footprints = data.get("footprints")
 
         if not footprints:
