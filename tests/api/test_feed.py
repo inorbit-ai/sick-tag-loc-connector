@@ -4,14 +4,14 @@
 # Copyright 2024 InOrbit, Inc.
 
 # Standard
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 # Third-party
 import pytest
 
 # InOrbit
-from sick_tag_loc_connector.api import Feed, RestClient
-from sick_tag_loc_connector.api.feed import ENDPOINT, SICK_RTLS_ID_PREFIX
+from sick_tag_loc_connector.api import Feed, RestClient, ENDPOINT_FEEDS
+from sick_tag_loc_connector.api.feed import SICK_RTLS_ID_PREFIX
 
 
 class TestFeed:
@@ -71,7 +71,7 @@ class TestFeed:
     def test_init_with_defaults(self, mock_rest_client):
         feed = Feed(mock_rest_client)
         assert feed.rest_client is mock_rest_client
-        assert feed.endpoint == ENDPOINT
+        assert feed.endpoint == ENDPOINT_FEEDS
         assert feed.alias is None
         assert feed.private == "0"
         assert feed.description is None
@@ -94,17 +94,17 @@ class TestFeed:
 
     def test_class_method_get(self, mock_rest_client, mock_feed, feed_data):
         feed = Feed.get(mock_rest_client, "1")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/1")
+        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT_FEEDS}/1")
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_class_method_get_invalid__id(self, mock_rest_client):
         with pytest.raises(Exception):
             Feed.get(mock_rest_client, "invalid__id")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/invalid__id")
+        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT_FEEDS}/invalid__id")
 
     def test_class_method_create(self, mock_rest_client, mock_feed, feed_data):
         feed = Feed.create(mock_rest_client, feed_data)
-        mock_rest_client.post.assert_called_once_with(f"/{ENDPOINT}", feed_data)
+        mock_rest_client.post.assert_called_once_with(f"/{ENDPOINT_FEEDS}", feed_data)
         self.validate_feed_data(feed, mock_rest_client, feed_data)
 
     def test_update(self, mock_rest_client, mock_feed):
@@ -130,7 +130,7 @@ class TestFeed:
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/1", expected_data
+            f"/{ENDPOINT_FEEDS}/1", expected_data
         )
 
     def test_save_with_existing_id(self, mock_rest_client, mock_feed):
@@ -156,7 +156,7 @@ class TestFeed:
         assert mock_feed._type is expected_data["type"]
         # noinspection PyUnresolvedReferences
         mock_feed.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/1", expected_data
+            f"/{ENDPOINT_FEEDS}/1", expected_data
         )
 
     def test_save_with_no_id(self, mock_rest_client, mock_feed, feed_data):
@@ -181,13 +181,15 @@ class TestFeed:
         assert id(mock_feed) is not mock_feed._id
         assert type(mock_feed) is not mock_feed._type
         # noinspection PyUnresolvedReferences
-        mock_feed.rest_client.post.assert_called_once_with(f"/{ENDPOINT}", expected_data)
+        mock_feed.rest_client.post.assert_called_once_with(
+            f"/{ENDPOINT_FEEDS}", expected_data
+        )
 
     def test_delete(self, mock_feed):
         assert mock_feed._id == "1"
         mock_feed.delete()
         # noinspection PyUnresolvedReferences
-        mock_feed.rest_client.delete.assert_called_once_with(f"/{ENDPOINT}/1")
+        mock_feed.rest_client.delete.assert_called_once_with(f"/{ENDPOINT_FEEDS}/1")
         assert mock_feed._id is None
 
     def test_get_attrs_dict(self, mock_feed, feed_data):
@@ -230,6 +232,18 @@ class TestFeed:
 
     def test_get_inorbit_id(self, mock_feed):
         expected = (
-            f"{SICK_RTLS_ID_PREFIX}-{mock_feed._type}:{mock_feed._id}:{mock_feed.title}"
+            f"{SICK_RTLS_ID_PREFIX}-{mock_feed._type}_{mock_feed._id}_{mock_feed.title}"
         )
         assert mock_feed.get_inorbit_id() == expected
+
+    def test_get_websocket_client(self):
+        rest_client = RestClient("http://localhost:8080/api", "my_api_key")
+
+        feed = Feed(rest_client, id="my_feed_id")
+        callback = MagicMock()
+        client = feed.get_websocket_client(9999, callback)
+
+        assert client.url == "ws://localhost:9999"
+        assert client.headers == {"X-ApiKey": "my_api_key"}
+        assert client.feed_id == "my_feed_id"
+        assert client._on_message_cb == callback

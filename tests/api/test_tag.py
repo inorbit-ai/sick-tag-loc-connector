@@ -10,9 +10,8 @@ from unittest.mock import Mock
 import pytest
 
 # InOrbit
-from sick_tag_loc_connector.api import Tag, RestClient
+from sick_tag_loc_connector.api import Tag, RestClient, ENDPOINT_TAGS
 from sick_tag_loc_connector.api.rest import FeedTypes
-from sick_tag_loc_connector.api.tag import ENDPOINT
 
 
 class TestTag:
@@ -72,7 +71,7 @@ class TestTag:
     def test_init_with_defaults(self, mock_rest_client):
         tag = Tag(mock_rest_client)
         assert tag.rest_client is mock_rest_client
-        assert tag.endpoint is ENDPOINT
+        assert tag.endpoint is ENDPOINT_TAGS
         assert tag.alias is None
         assert tag.private == "0"
         assert tag.description is None
@@ -94,17 +93,17 @@ class TestTag:
 
     def test_class_method_get(self, mock_rest_client, mock_tag, tag_data):
         tag = Tag.get(mock_rest_client, "12")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/12")
+        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT_TAGS}/12")
         self.validate_tag_data(tag, mock_rest_client, tag_data)
 
     def test_class_method_get_invalid__id(self, mock_rest_client):
         with pytest.raises(Exception):
             Tag.get(mock_rest_client, "invalid__id")
-        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT}/invalid__id")
+        mock_rest_client.get.assert_called_once_with(f"/{ENDPOINT_TAGS}/invalid__id")
 
     def test_class_method_create(self, mock_rest_client, mock_tag, tag_data):
         tag = Tag.create(mock_rest_client, tag_data)
-        mock_rest_client.post.assert_called_once_with(f"/{ENDPOINT}", tag_data)
+        mock_rest_client.post.assert_called_once_with(f"/{ENDPOINT_TAGS}", tag_data)
         self.validate_tag_data(tag, mock_rest_client, tag_data)
 
     def test_update(self, mock_rest_client, mock_tag):
@@ -125,7 +124,7 @@ class TestTag:
         mock_tag.update()
         # noinspection PyUnresolvedReferences
         mock_tag.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/12", expected_data
+            f"/{ENDPOINT_TAGS}/12", expected_data
         )
         assert "updated-now" == mock_tag.updated
         assert mock_tag._id is expected_data["id"]
@@ -149,7 +148,7 @@ class TestTag:
         mock_tag.save()
         # noinspection PyUnresolvedReferences
         mock_tag.rest_client.put.assert_called_once_with(
-            f"/{ENDPOINT}/12", expected_data
+            f"/{ENDPOINT_TAGS}/12", expected_data
         )
         assert "updated-now" == mock_tag.updated
         assert mock_tag._id is expected_data["id"]
@@ -175,13 +174,15 @@ class TestTag:
         assert mock_tag._id is tag_data["id"]
         assert id(mock_tag) is not mock_tag._id
         # noinspection PyUnresolvedReferences
-        mock_tag.rest_client.post.assert_called_once_with(f"/{ENDPOINT}", expected_data)
+        mock_tag.rest_client.post.assert_called_once_with(
+            f"/{ENDPOINT_TAGS}", expected_data
+        )
 
     def test_delete(self, mock_tag):
         assert mock_tag._id == "12"
         mock_tag.delete()
         # noinspection PyUnresolvedReferences
-        mock_tag.rest_client.delete.assert_called_once_with(f"/{ENDPOINT}/12")
+        mock_tag.rest_client.delete.assert_called_once_with(f"/{ENDPOINT_TAGS}/12")
         assert mock_tag._id is None
 
     def test_get_attrs_dict(self, mock_tag, tag_data):

@@ -10,8 +10,8 @@ from enum import Enum
 # Third-party
 import requests
 
-# The global endpoint name for streams
-STREAMS_ENDPOINT: str = "streams"
+# InOrbit
+from sick_tag_loc_connector.api import HEADER_API_KEY
 
 
 class FeedTypes(Enum):
@@ -50,7 +50,7 @@ class RestClient:
             api_key (str): The API key for authentication
         """
         self.url = url
-        self.headers = {"X-ApiKey": api_key, "Content-Type": "application/json"}
+        self.headers = {HEADER_API_KEY: api_key, "Content-Type": "application/json"}
 
     def get(self, endpoint: str) -> dict:
         """Helper Method for GET
