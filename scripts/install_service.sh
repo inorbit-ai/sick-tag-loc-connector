@@ -32,9 +32,9 @@ esac
 echo ""
 
 NAME=$1
-TEMPLATE="scripts/sick-tag-loc-connector@.service"
+TEMPLATE=`realpath scripts/sick-tag-loc-connector@.service`
 SYSTEMD_SERVICE_NAME="sick-tag-loc-connector@$1.service"
-START_SCRIPT_LOCATION="scripts/start.sh"
+START_SCRIPT_LOCATION=`realpath scripts/start.sh`
 DESTINATION_START_SCRIPT="/usr/local/bin/sick-tag-loc-connector.sh"
 
 # Uninstall procedure
@@ -56,9 +56,9 @@ if [ "$1" == "--uninstall" ]; then
     exit 0
 fi
 
-echo Note: The user in the \`User=\` field in $( realpath $TEMPLATE ) defines the user that will run the Connector.
+echo Note: The user in the \`User=\` field in $TEMPLATE defines the user that will run the Connector.
 echo "If such user doesn't exist it can be created with \`useradd <username>\`"
-echo If you wish to run the service as a different user, edit the \`User=\` field in $( realpath $TEMPLATE ) before continuing.
+echo If you wish to run the service as a different user, edit the \`User=\` field in $TEMPLATE before continuing.
 read -n 1 -s -r -p "Press any key to continue"
 echo ""
 echo ""
