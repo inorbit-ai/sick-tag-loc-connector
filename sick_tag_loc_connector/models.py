@@ -93,6 +93,7 @@ class SickTagLocConfigModel(BaseModel):
             raise ValueError("Whitespaces are not allowed")
         return value
 
+    # noinspection PyMethodParameters
     @model_validator(mode="before")
     def check_tag_footprints(cls, data):
         """Validate the defined footprints and create the tag_footprints mapping."""
