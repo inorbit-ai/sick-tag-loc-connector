@@ -68,7 +68,21 @@ example
 
 ### Run the Connector as a service
 
-<!-- TODO -->
+To run the Connector as a service, you can use the provided systemd service file. It can be installed by running [`scripts/install_service.sh`](scripts/install_service.sh).
+
+Example: create a service named `sick-tag-loc-connector@my_config.service` that runs the Connector with the `config/my_config.yaml` configuration.
+```bash
+./scripts/install_service.sh my_config
+```
+
+The service can be enabled at boot and started with
+
+```bash
+sudo systemctl enable sick-tag-loc-connector@my_config.service
+sudo systemctl start sick-tag-loc-connector@my_config.service
+```
+
+Run `./scripts/install_service.sh` with no arguments for more information.
 
 ## Next Steps
 
