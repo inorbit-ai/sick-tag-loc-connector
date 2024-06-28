@@ -34,7 +34,9 @@ class SickTagLocConfigModel(BaseModel):
         sick_rtls_rest_api_port (int, optional): The port SICK RTLS REST API
         sick_rtls_websocket_port (int, optional): The port SICK RTLS WebSocket
         sick_rtls_api_key (str | None, optional): The SICK RTLS API key
-        footprint_specs (Dict[str, RobotFootprintSpec], optional): List of defined
+        translation_x (float, optional): The coordinate translation in the X dimension
+        translation_y (float, optional): The coordinate translation in the Y dimension
+        footprints (Dict[str, RobotFootprintSpec], optional): List of defined
             footprints for tags. Should include the footprint and radius.
         tag_footprints (Dict[str, str]): Mapping of tag IDs to `RobotFootprintSpec`
             created after parsing the `footprint_specs` attribute.
@@ -44,6 +46,8 @@ class SickTagLocConfigModel(BaseModel):
     sick_rtls_rest_api_port: int = DEFAULT_RTLS_REST_API_PORT
     sick_rtls_websocket_port: int = DEFAULT_RTLS_WS_PORT
     sick_rtls_api_key: str = os.getenv("SICK_RTLS_API_KEY")
+    translation_x: float = 0.0
+    translation_y: float = 0.0
     footprints: Optional[List[Dict[str, Any]]] = {}
     tag_footprints: Dict[str, RobotFootprintSpec] = {}
 
@@ -89,6 +93,7 @@ class SickTagLocConfigModel(BaseModel):
             raise ValueError("Whitespaces are not allowed")
         return value
 
+    # noinspection PyMethodParameters
     @model_validator(mode="before")
     def check_tag_footprints(cls, data):
         """Validate the defined footprints and create the tag_footprints mapping."""
