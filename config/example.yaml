@@ -11,12 +11,20 @@ account_id: <inorbit_account_id>
 
 # This is where you define custom fields specific to your robot's connector
 connector_config:
+  # SICK system
   sick_rtls_http_server_address: http://192.168.1.249/
   sick_rtls_rest_api_port: 8080
   sick_rtls_websocket_port: 8080
-  translation_x: 23.24
-  translation_y: 6.02
+  # Translational transform between SICK Tag-LOC and InOrbit
+  # The values can be obtained by running the `scripts/transform.py` script.
+  # This is required to convert the SICK Tag-LOC coordinates to InOrbit coordinates.
+  translation_x: 0.0
+  translation_y: 0.0
   # Custom footprints
+  # Each list item is a footprint definition that will be used to create a footprint
+  # in InOrbit. See https://developer.inorbit.ai/docs for reference.
+  # The `tags` field is a list of SICK tag IDs that will be associated with the footprint.
+  # A robot level RobotFootprint configuration will be created for each tag ID.
   footprints:
     - tags: [tagId1, tagId7]
       spec:

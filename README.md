@@ -1,17 +1,59 @@
-# sick-tag-loc-connector
-A Python connector for the SICK Tag-LOC RTLS into InOrbit.
+# SICK Tag LOC InOrbit Connector
+
+![SICK Tag LOC RTLS InOrbit Connector](./assets/inorbit_sick_connector_banner.png)
+
+<table align="center">
+  <thead>
+    <tr>
+      <th>OS</th>
+      <th>Python 3.10</th>
+      <th>Python 3.11</th>
+      <th>Python 3.12</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Linux</td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_LinuxPython310QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_LinuxPython310QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_LinuxPython311QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_LinuxPython311QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_LinuxPython312QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_LinuxPython312QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+    </tr>
+    <tr>
+      <td>MacOS</td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_MacPython310QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_MacPython310QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_MacPython311QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_MacPython311QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_MacPython312QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_MacPython312QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+    </tr>
+    <tr>
+      <td>Windows</td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_WindowsPython310QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_WindowsPython310QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_WindowsPython311QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_WindowsPython311QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+      <td><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_WindowsPython312QualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_WindowsPython312QualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+    </tr>
+    <tr>
+      <td><a href="https://www.jetbrains.com/qodana/">Qodana</a></td>
+      <td colspan=3 align="center"><a href="https://inorbit.teamcity.com/buildConfiguration/Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_QodanaLinuxQualityCheck?branch=%3Cdefault%3E&mode=builds"><img src="https://inorbit.teamcity.com/app/rest/builds/buildType:id:Engineering_Development_DeveloperPortal_Connectors_SickTagLocConnector_QodanaLinuxQualityCheck/statusIcon.svg" alt="TeamCity"/></td>
+    </tr>
+  </tbody>
+</table>
 
 ## Overview
 
-<!-- TODO -->
+A Python connector for [SICK](https://www.sick.com/us/en/) Tag-LOC into [InOrbit](https://inorbit.ai/). Built on top of the [inorbit-connector-python](https://github.com/inorbit-ai/inorbit-connector-python) package, it provides a way to integrate the SICK's Tag-LOC system with InOrbit for real time location tracking.
 
 ## Features
 
-<!-- TODO -->
+Running one instance of the Connector per SICK Tag-LOC system unlocks the following key features:
+- Real-time location tracking of multiple SICK Tags.
+- Integration with InOrbit's heterogeneous fleet and traffic management features.
+- Customizable configurations footprints for tracked tags.
+- All of the features provided by the InOrbit platform.
 
 ## Requirements
 
-<!-- TODO -->
+- Python 3.10 or later.
+- InOrbit account [(it's free to sign up!)](https://control.inorbit.ai)
+- SICK Tag-LOC system.
 
 ## Setup
 
@@ -23,7 +65,9 @@ There are two ways for installing the connector Python package.
 
 2. From source: clone the repository and install the dependencies: -->
 
-From source: clone the repository and install the dependencies:
+### Installation from source
+
+Clone the repository and install the dependencies:
 
 ```bash
 virtualenv .venv
@@ -31,9 +75,9 @@ virtualenv .venv
 pip install -e .
 ```
 
-Configure the Connector:
+### Configure the Connector
 
-- Copy [`config/example.yaml`](config/example.yaml) and modify the settings to match your setup.
+- Copy [`config/example.yaml`](config/example.yaml) and modify the settings to match your setup. Each configurable parameter is documented in the file itself.
 
 - Copy [`config/example.env`](config/example.env) to `config/.env` and set the environment variables following the instructions in the same
   file. You can get the `INORBIT_API_KEY` for your account from InOrbit's
@@ -43,7 +87,7 @@ Configure the Connector:
 
 ### Run the Connector manually
 
-Once all dependencies are installed and the configuration is complete, the Connector can be run with the  `sick-tag-loc-connector` command (run with `--help` for details).
+Once all dependencies are installed and the configuration is complete, the Connector can be run with the `sick-tag-loc-connector` command (run with `--help` for details).
 
 ```bash
 # Add the environment variables, activate the virtual environment and run the Connector
@@ -55,7 +99,7 @@ sick-tag-loc-connector -c config/example.yaml
 A [script](scripts/start.sh) was provided to help run the Connector.
 
 ```
-❯ ./scripts/start.sh 
+❯ ./scripts/start.sh
 Usage: ./scripts/start.sh <config_basename> [<args>]
 Example: `./scripts/start.sh local -v` runs the Connector with the 'config/local.yaml' configuration and the flag '-v'
 
@@ -71,6 +115,7 @@ example
 To run the Connector as a service, you can use the provided systemd service file. It can be installed by running [`scripts/install_service.sh`](scripts/install_service.sh).
 
 Example: create a service named `sick-tag-loc-connector@my_config.service` that runs the Connector with the `config/my_config.yaml` configuration.
+
 ```bash
 ./scripts/install_service.sh my_config
 ```
@@ -84,6 +129,12 @@ sudo systemctl start sick-tag-loc-connector@my_config.service
 
 Run `./scripts/install_service.sh` with no arguments for more information.
 
-## Next Steps
+## Next steps
 
-<!-- TODO -->
+Once your SICK Tag-LOC system is InOrbit connected, visit the [developer documentation](https://developer.inorbit.ai/docs) for an overview of the available utilities that unlock the full potential of the InOrbit platform. Please note that the features available on your account will depend on your [InOrbit Edition](https://www.inorbit.ai/pricing). Don't hesitate to contact [support@inorbit.ai](support@inorbit.ai) for more information.
+
+## Contributing
+
+If you'd like to contribute, please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information!
+
+![Powered by InOrbit](./assets/inorbit_github_footer.png)
