@@ -2,7 +2,7 @@
 
 ![SICK Tag LOC RTLS InOrbit Connector](./assets/inorbit_sick_connector_banner.png)
 
-<table>
+<table align="center">
   <thead>
     <tr>
       <th>OS</th>
