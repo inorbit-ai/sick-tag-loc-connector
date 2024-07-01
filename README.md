@@ -1,6 +1,6 @@
 # sick-tag-loc-connector
 
-A Python connector for the SICK Tag-LOC RTLS into InOrbit.
+![SICK Tag LOC RTLS InOrbit Connector](./assets/inorbit_sick_connector_banner.png)
 
 <table>
   <thead>
@@ -39,7 +39,7 @@ A Python connector for the SICK Tag-LOC RTLS into InOrbit.
 
 ## Overview
 
-<!-- TODO -->
+A Python connector for the SICK Tag-LOC RTLS into InOrbit.
 
 ## Features
 
@@ -124,3 +124,6 @@ Run `./scripts/install_service.sh` with no arguments for more information.
 ## Next Steps
 
 <!-- TODO -->
+
+
+![Powered by InOrbit](./assets/inorbit_github_footer.png)
