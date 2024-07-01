@@ -129,9 +129,12 @@ sudo systemctl start sick-tag-loc-connector@my_config.service
 
 Run `./scripts/install_service.sh` with no arguments for more information.
 
-## Next Steps
+## Next steps
 
-<!-- TODO -->
+Once your SICK Tag-LOC system is InOrbit connected, visit the [developer documentation](https://developer.inorbit.ai/docs) for an overview of the available utilities that unlock the full potential of the InOrbit platform. Please note that the features available on your account will depend on your [InOrbit Edition](https://www.inorbit.ai/pricing). Don't hesitate to contact [support@inorbit.ai](support@inorbit.ai) for more information.
 
+## Contributing
+
+If you'd like to contribute, please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information!
 
 ![Powered by InOrbit](./assets/inorbit_github_footer.png)

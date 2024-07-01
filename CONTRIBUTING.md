@@ -20,7 +20,7 @@ Ready to contribute? Here's how to set up `sick-tag-loc-connector` for local dev
     cd sick-tag-loc-connector
     virtualenv .venv
     source .venv/bin/activate
-    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
     ```
 
 4. Create a branch for local development:
@@ -48,3 +48,5 @@ Ready to contribute? Here's how to set up `sick-tag-loc-connector` for local dev
     ```
 
 7. Submit a pull request through the [GitHub](https://github.com/inorbit-ai/sick-tag-loc-connector/pulls) website.
+
+Any contribution that you make to this repository will be under the MIT license, as dictated by that [license](https://opensource.org/licenses/MIT).
