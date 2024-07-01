@@ -1,4 +1,4 @@
-# sick-tag-loc-connector
+# SICK Tag LOC InOrbit Connector
 
 ![SICK Tag LOC RTLS InOrbit Connector](./assets/inorbit_sick_connector_banner.png)
 
@@ -39,15 +39,21 @@
 
 ## Overview
 
-A Python connector for the SICK Tag-LOC RTLS into InOrbit.
+A Python connector for [SICK](https://www.sick.com/us/en/) Tag-LOC into [InOrbit](https://inorbit.ai/). Built on top of the [inorbit-connector-python](https://github.com/inorbit-ai/inorbit-connector-python) package, it provides a way to integrate the SICK's Tag-LOC system with InOrbit for real time location tracking.
 
 ## Features
 
-<!-- TODO -->
+Running one instance of the Connector per SICK Tag-LOC system unlocks the following key features:
+- Real-time location tracking of multiple SICK Tags.
+- Integration with InOrbit's heterogeneous fleet and traffic management features.
+- Customizable configurations footprints for tracked tags.
+- All of the features provided by the InOrbit platform.
 
 ## Requirements
 
-<!-- TODO -->
+- Python 3.10 or later.
+- InOrbit account [(it's free to sign up!)](https://control.inorbit.ai)
+- SICK Tag-LOC system.
 
 ## Setup
 
@@ -59,7 +65,9 @@ There are two ways for installing the connector Python package.
 
 2. From source: clone the repository and install the dependencies: -->
 
-From source: clone the repository and install the dependencies:
+### Installation from source
+
+Clone the repository and install the dependencies:
 
 ```bash
 virtualenv .venv
@@ -67,9 +75,9 @@ virtualenv .venv
 pip install -e .
 ```
 
-Configure the Connector:
+### Configure the Connector
 
-- Copy [`config/example.yaml`](config/example.yaml) and modify the settings to match your setup.
+- Copy [`config/example.yaml`](config/example.yaml) and modify the settings to match your setup. Each configurable parameter is documented in the file itself.
 
 - Copy [`config/example.env`](config/example.env) to `config/.env` and set the environment variables following the instructions in the same
   file. You can get the `INORBIT_API_KEY` for your account from InOrbit's
